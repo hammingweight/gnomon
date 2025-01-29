@@ -58,8 +58,15 @@ func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int)
 
 func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) {
 	defer wg.Done()
-	powerReadings := make([]int, 4)
+	defer func() {
+		log.Println("Shutting down; configuring inverter to power only the essential loads")
+		err := rest.UpdateEssentialOnly(true)
+		if err != nil {
+			log.Println("Failed to update inverter's settings: ", err)
+		}
+	}()
 
+	powerReadings := make([]int, 4)
 	var inverterPower int
 	var err error
 	for {
