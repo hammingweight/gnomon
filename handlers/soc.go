@@ -20,7 +20,9 @@ L:
 			break L
 		case s := <-ch:
 			threshold = s.Threshold
-			maxSoc = s.MaxSoc
+			if s.Soc > maxSoc {
+				maxSoc = s.Soc
+			}
 			if maxSoc >= 100 {
 				break L
 			}

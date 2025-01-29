@@ -23,9 +23,7 @@ var c client
 
 type State struct {
 	Power         int
-	MaxPower      int
 	Soc           int
-	MaxSoc        int
 	Load          int
 	EssentialOnly bool
 	Threshold     int
@@ -33,11 +31,11 @@ type State struct {
 }
 
 func (s State) String() string {
-	whichLoads := "The inverter is powering all loads"
+	whichLoads := "all loads"
 	if s.EssentialOnly {
-		whichLoads = "The inverter is powering essential loads only"
+		whichLoads = "only essential loads"
 	}
-	return fmt.Sprintf("%s: Input power = %dW, Battery SOC = %d%%, Load = %dW", whichLoads, s.Power, s.Soc, s.Load)
+	return fmt.Sprintf("The inverter is powering %s. Input power = %dW, Battery SOC = %d%%, Load = %dW.", whichLoads, s.Power, s.Soc, s.Load)
 }
 
 func Authenticate(ctx context.Context) {
@@ -77,9 +75,6 @@ func readState(ctx context.Context, lastUpdateTime string) (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	if s.Power > s.MaxPower {
-		s.MaxPower = s.Power
-	}
 	pv, ok := input.PV(0)
 	if !ok {
 		return nil, errors.New("can't read time")
@@ -97,7 +92,11 @@ func readState(ctx context.Context, lastUpdateTime string) (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.Threshold = inv.BatteryCapacity()
+	bc, err := inv.BatteryCapacity()
+	if err != nil {
+		return nil, err
+	}
+	s.Threshold = bc
 	s.EssentialOnly = inv.EssentialOnly()
 
 	bat, err := c.client.Battery(ctx)
@@ -107,9 +106,6 @@ func readState(ctx context.Context, lastUpdateTime string) (*State, error) {
 	s.Soc, err = bat.SOC()
 	if err != nil {
 		return nil, err
-	}
-	if s.Soc > s.MaxSoc {
-		s.MaxSoc = s.Soc
 	}
 
 	load, err := c.client.Load(ctx)
