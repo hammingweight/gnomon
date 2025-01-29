@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
-	github.com/hammingweight/synkctl v1.4.5 // indirect
+	github.com/hammingweight/synkctl v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

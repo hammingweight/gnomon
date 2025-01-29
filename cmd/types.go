@@ -41,7 +41,6 @@ func (hhmm *HhMm) Until() (time.Duration, error) {
 	}
 	now := time.Now()
 	tm, _ := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("2006-01-02 %s:00", hhmm))
-	fmt.Println(tm)
 	tm = tm.AddDate(now.Year()-2006, int(now.Month())-1, now.Day()-2)
 	_, offset := now.Zone()
 	tm = tm.Add(time.Duration(-offset) * time.Second)

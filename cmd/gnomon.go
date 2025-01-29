@@ -28,7 +28,7 @@ import (
 
 var Version string = "1.0.0"
 
-func run(_ *cobra.Command) error {
+func run(cmd *cobra.Command) error {
 	start, err := startTime.Until()
 	if err != nil {
 		return err
@@ -45,7 +45,11 @@ func run(_ *cobra.Command) error {
 		end = time.Hour * 12
 	}
 	runTime := end - start
-	return handlers.Execute(start, runTime)
+	configFile, err := cmd.Flags().GetString("config")
+	if err != nil {
+		return err
+	}
+	return handlers.Execute(start, runTime, configFile)
 }
 
 var startTime HhMm
