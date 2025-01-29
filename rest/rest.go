@@ -27,7 +27,7 @@ type State struct {
 	Load          int
 	EssentialOnly bool
 	Threshold     int
-	Time          string
+	time          string
 }
 
 func (s State) String() string {
@@ -82,10 +82,10 @@ func readState(ctx context.Context, s *State) (bool, error) {
 		return false, errors.New("can't read update time")
 	}
 	updateTime := t.(string)
-	if s.Time == updateTime {
+	if s.time == updateTime {
 		return false, nil
 	}
-	s.Time = updateTime
+	s.time = updateTime
 
 	inv, err := c.client.Inverter(ctx)
 	if err != nil {
