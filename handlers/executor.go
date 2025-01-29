@@ -27,9 +27,13 @@ func Execute(start time.Duration, runTime time.Duration, configFile string) erro
 	socChan := make(chan rest.State)
 	go SocHandler(ctx, wg, socChan)
 
-	fanout := Fanout(displayChan, socChan)
+	wg.Add(1)
+	ctChan := make(chan rest.State)
+	go CtCoilHandler(ctx, wg, ctChan)
 
-	rest.Poll(ctx, configFile, fanout)
+	fanout := Fanout(displayChan, socChan, ctChan)
+
+	go rest.Poll(ctx, configFile, fanout)
 
 	wg.Wait()
 	return nil

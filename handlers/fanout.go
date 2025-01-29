@@ -1,6 +1,8 @@
 package handlers
 
-import "github.com/hammingweight/gnomon/rest"
+import (
+	"github.com/hammingweight/gnomon/rest"
+)
 
 func Fanout(chans ...chan rest.State) chan rest.State {
 	ch := make(chan rest.State)

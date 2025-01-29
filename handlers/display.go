@@ -13,9 +13,7 @@ func DisplayHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State)
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Done")
 			return
-
 		case state := <-ch:
 			log.Println(state)
 		}

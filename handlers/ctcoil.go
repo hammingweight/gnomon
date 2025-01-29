@@ -37,43 +37,48 @@ func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) b
 		return false
 	}
 
-	return averagePower < inverterPower/8
+	return averagePower < inverterPower/8 && soc < thresholdSoc+40
 }
 
-func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) {
+func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) error {
 	if switchOn(averagePower, inverterPower, soc, threshold) {
-		log.Println("powering all loads")
-		rest.UpdateEssentialOnly(false)
+		log.Println("Configuring inverter to power all loads")
+		return rest.UpdateEssentialOnly(false)
 	}
+	return nil
 }
 
-func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) {
+func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) error {
 	if switchOff(averagePower, inverterPower, soc, threshold) {
-		log.Println("powering essential loads only")
-		rest.UpdateEssentialOnly(true)
+		log.Println("Configuring inverter to power only the essential loads")
+		return rest.UpdateEssentialOnly(true)
 	}
+	return nil
 }
 
-func EssentialOnlyHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) {
+func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) {
 	defer wg.Done()
 	powerReadings := make([]int, 4)
 
+	<-ch
 	inverterPower := rest.GetInverterPower()
 
 	for {
 		select {
 		case <-ctx.Done():
-			rest.UpdateEssentialOnly(true)
 			return
 		case s := <-ch:
 			powerReadings = powerReadings[1:]
 			powerReadings = append(powerReadings, s.Power)
 			averagePower := average(powerReadings)
-			log.Println("Average power: ", averagePower)
+			var err error
 			if s.EssentialOnly {
-				handleEssentialOnly(averagePower, inverterPower, s.Soc, s.Threshold)
+				err = handleEssentialOnly(averagePower, inverterPower, s.Soc, s.Threshold)
 			} else {
-				handleAllLoads(averagePower, inverterPower, s.Soc, s.Threshold)
+				err = handleAllLoads(averagePower, inverterPower, s.Soc, s.Threshold)
+			}
+			if err != nil {
+				log.Println("Failed to reconfigure inverter: ", err)
 			}
 		}
 	}
