@@ -70,7 +70,11 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 	var inverterPower int
 	var err error
 	for {
-		<-ch
+		select {
+		case <-ch:
+		case <-ctx.Done():
+			return
+		}
 		inverterPower, err = rest.GetInverterPower()
 		if err == nil {
 			break

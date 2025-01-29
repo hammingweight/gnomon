@@ -31,7 +31,7 @@ func Execute(start time.Duration, runTime time.Duration, configFile string) erro
 	ctChan := make(chan rest.State)
 	go CtCoilHandler(ctx, wg, ctChan)
 
-	fanout := Fanout(displayChan, socChan, ctChan)
+	fanout := Fanout(displayChan /*, socChan, ctChan*/)
 
 	go rest.Poll(ctx, configFile, fanout)
 

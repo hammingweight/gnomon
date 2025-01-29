@@ -61,69 +61,68 @@ func Authenticate(ctx context.Context) {
 	}
 }
 
-var s State
-
-func readState(ctx context.Context, lastUpdateTime string) (*State, error) {
+func readState(ctx context.Context, s *State) (bool, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	input, err := c.client.Input(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	s.Power, err = input.Power()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	pv, ok := input.PV(0)
 	if !ok {
-		return nil, errors.New("can't read time")
+		return false, errors.New("can't read MPPT values")
 	}
 	t, ok := pv["time"]
 	if !ok {
-		return nil, errors.New("can't read time")
+		return false, errors.New("can't read update time")
 	}
-	s.Time = t.(string)
-	if s.Time == lastUpdateTime {
-		return nil, nil
+	updateTime := t.(string)
+	if s.Time == updateTime {
+		return false, nil
 	}
+	s.Time = updateTime
 
 	inv, err := c.client.Inverter(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	bc, err := inv.BatteryCapacity()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	s.Threshold = bc
 	s.EssentialOnly = inv.EssentialOnly()
 
 	bat, err := c.client.Battery(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	s.Soc, err = bat.SOC()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
 	load, err := c.client.Load(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 	s.Load, err = load.Power()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	return &s, nil
+	return true, nil
 }
 
 func Poll(ctx context.Context, configFile string, ch chan State) {
 	reauthFlag := true
-	lastUpdateTime := ""
 	c.configFile = configFile
+	s := &State{}
 	for {
 		if reauthFlag {
 			Authenticate(ctx)
@@ -135,18 +134,16 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 			}
 		}
 		reauthFlag = false
-		state, err := readState(ctx, lastUpdateTime)
+		changed, err := readState(ctx, s)
 		if err != nil {
 			reauthFlag = true
 			log.Println("error during poll: ", err)
 			time.Sleep(30 * time.Second)
 			continue
 		}
-		if state == nil {
-			continue
+		if changed {
+			ch <- *s
 		}
-		lastUpdateTime = state.Time
-		ch <- *state
 	}
 }
 
