@@ -60,8 +60,16 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 	defer wg.Done()
 	powerReadings := make([]int, 4)
 
-	<-ch
-	inverterPower := rest.GetInverterPower()
+	var inverterPower int
+	var err error
+	for {
+		<-ch
+		inverterPower, err = rest.GetInverterPower()
+		if err == nil {
+			break
+		}
+		log.Println("Failed to read inverter's rated power: ", err)
+	}
 
 	for {
 		select {

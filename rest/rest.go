@@ -73,7 +73,10 @@ func readState(ctx context.Context, lastUpdateTime string) (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.Power = input.Power()
+	s.Power, err = input.Power()
+	if err != nil {
+		return nil, err
+	}
 	if s.Power > s.MaxPower {
 		s.MaxPower = s.Power
 	}
@@ -101,7 +104,10 @@ func readState(ctx context.Context, lastUpdateTime string) (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.Soc = bat.SOC()
+	s.Soc, err = bat.SOC()
+	if err != nil {
+		return nil, err
+	}
 	if s.Soc > s.MaxSoc {
 		s.MaxSoc = s.Soc
 	}
@@ -110,7 +116,10 @@ func readState(ctx context.Context, lastUpdateTime string) (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.Load = load.Power()
+	s.Load, err = load.Power()
+	if err != nil {
+		return nil, err
+	}
 
 	return &s, nil
 }
@@ -171,7 +180,7 @@ func UpdateEssentialOnly(eo bool) error {
 	return c.client.UpdateInverter(ctx, inv)
 }
 
-func GetInverterPower() int {
+func GetInverterPower() (int, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	ctx := context.Background()
