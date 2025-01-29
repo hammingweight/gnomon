@@ -19,8 +19,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/hammingweight/gnomon/cmd/handlers"
+	"github.com/hammingweight/gnomon/handlers"
 	"github.com/hammingweight/synkctl/configuration"
 	"github.com/spf13/cobra"
 )
@@ -28,8 +29,27 @@ import (
 var Version string = "1.0.0"
 
 func run(_ *cobra.Command) error {
-	return handlers.Execute("", "11:30")
+	start, err := startTime.Until()
+	if err != nil {
+		return err
+	}
+	var end time.Duration
+	end, err = endTime.Until()
+	if err != nil {
+		return err
+	}
+	if end < start {
+		end += 24 * time.Hour
+	}
+	if endTime == "" {
+		end = time.Hour * 12
+	}
+	runTime := end - start
+	return handlers.Execute(start, runTime)
 }
+
+var startTime HhMm
+var endTime HhMm
 
 var gnomonCmd = &cobra.Command{
 	Use:     "gnomon",
@@ -56,4 +76,6 @@ func init() {
 		os.Exit(1)
 	}
 	gnomonCmd.Flags().StringP("config", "c", configFile, "synkctl config file path")
+	gnomonCmd.Flags().VarP(&startTime, "start", "s", "start time in 24 hour HH:MM format, e.g. 06:00")
+	gnomonCmd.Flags().VarP(&endTime, "end", "e", "end time in 24 hour HH:MM format, e.g. 19:30")
 }
