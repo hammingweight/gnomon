@@ -42,7 +42,29 @@ func setupLogging(logfile string) (*os.File, error) {
 	return f, nil
 }
 
+func getStartDelayAndRunningTime() (time.Duration, time.Duration, error) {
+	start, err := startTime.Until()
+	if err != nil {
+		return 0, 0, err
+	}
+	var end time.Duration
+	if endTime == "" {
+		end = time.Hour * 12
+	} else {
+		end, err = endTime.Until()
+		if err != nil {
+			return 0, 0, err
+		}
+	}
+	if end < start {
+		end += 24 * time.Hour
+	}
+	runTime := end - start
+	return start, runTime, nil
+}
+
 func run(cmd *cobra.Command) error {
+	// Set up logging
 	logfile, err := cmd.Flags().GetString("logfile")
 	if err != nil {
 		return err
@@ -57,31 +79,26 @@ func run(cmd *cobra.Command) error {
 		}
 	}()
 
-	start, err := startTime.Until()
+	// Find when to start running and for how long.
+	delay, runTime, err := getStartDelayAndRunningTime()
 	if err != nil {
 		return err
 	}
-	var end time.Duration
-	end, err = endTime.Until()
-	if err != nil {
-		return err
-	}
-	if end < start {
-		end += 24 * time.Hour
-	}
-	if endTime == "" {
-		end = time.Hour * 12
-	}
-	runTime := end - start
+
+	// Find the config file.
 	configFile, err := cmd.Flags().GetString("config")
 	if err != nil {
 		return err
 	}
+
+	// Must the CT coil be enabled/disabled?
 	ct, err := cmd.Flags().GetBool("ct-coil")
 	if err != nil {
 		return err
 	}
-	return handlers.Execute(start, runTime, configFile, ct)
+
+	// Start managing.
+	return handlers.ManageInverter(delay, runTime, configFile, ct)
 }
 
 var startTime HhMm
@@ -89,7 +106,7 @@ var endTime HhMm
 
 var gnomonCmd = &cobra.Command{
 	Use:     "gnomon",
-	Short:   "Manages a SunSynk inverter's settings daily",
+	Short:   "Manages a SunSynk inverter's settings",
 	Args:    cobra.ExactArgs(0),
 	Version: Version,
 	RunE: func(cmd *cobra.Command, args []string) error {

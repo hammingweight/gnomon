@@ -6,8 +6,11 @@ import (
 	"time"
 )
 
+// HhMm is a string that represents a 24 hour clock time as hours and minutes in
+// HH:MM format.
 type HhMm string
 
+// Sets a clock time and validates the time.
 func (hhmm *HhMm) Set(s string) error {
 	if s == "" {
 		return nil
@@ -27,6 +30,7 @@ func (hhmm *HhMm) Set(s string) error {
 	return nil
 }
 
+// Type returns a string showing how a CLI should display the type.
 func (hhmm *HhMm) Type() string {
 	return "HH:MM"
 }
@@ -35,10 +39,16 @@ func (hhmm *HhMm) String() string {
 	return string(*hhmm)
 }
 
+// Until returns the time.Duration until the specified clock time.
 func (hhmm *HhMm) Until() (time.Duration, error) {
+	// An unspecified time is equivalent to now.
 	if *hhmm == HhMm("") {
 		return time.Nanosecond, nil
 	}
+
+	// This is some hackery to use Go's time functions to get how long we have to
+	// wait by prepending a date to the time and then subtracting the time that
+	// has elapsed since midnight on that date.
 	now := time.Now()
 	tm, _ := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("2006-01-02 %s:00", hhmm))
 	tm = tm.AddDate(now.Year()-2006, int(now.Month())-1, now.Day()-2)
@@ -49,6 +59,7 @@ func (hhmm *HhMm) Until() (time.Duration, error) {
 		if d > 0 {
 			break
 		}
+		// If d < 0, then wait until the next day.
 		d += 24 * time.Hour
 	}
 	return d, nil

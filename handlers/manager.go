@@ -9,18 +9,18 @@ import (
 	"github.com/hammingweight/gnomon/rest"
 )
 
-func Execute(start time.Duration, runTime time.Duration, configFile string, ct bool) error {
-	if start >= time.Minute {
-		log.Printf("Waiting for %s to start...\n", start)
+func ManageInverter(delay time.Duration, runTime time.Duration, configFile string, ct bool) error {
+	if delay >= 5*time.Second {
+		log.Printf("Waiting for %s to start...\n", delay)
 	}
-	<-time.Tick(start)
+	time.Sleep(delay)
 	log.Println("Started")
+
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, runTime)
 	defer cancel()
 
 	wg := &sync.WaitGroup{}
-
 	wg.Add(1)
 	displayChan := make(chan rest.State)
 	go DisplayHandler(ctx, wg, displayChan)

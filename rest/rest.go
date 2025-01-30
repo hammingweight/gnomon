@@ -3,7 +3,6 @@ package rest
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -20,17 +19,6 @@ type client struct {
 }
 
 var c client
-
-type State struct {
-	Power int
-	Soc   int
-	Load  int
-	time  string
-}
-
-func (s State) String() string {
-	return fmt.Sprintf("Input power = %dW, Battery SOC = %d%%, Load = %dW.", s.Power, s.Soc, s.Load)
-}
 
 func Authenticate(ctx context.Context) {
 	c.mutex.Lock()
@@ -55,7 +43,7 @@ func Authenticate(ctx context.Context) {
 	}
 }
 
-func readState(ctx context.Context, s *State) (bool, error) {
+func ReadState(ctx context.Context, s *State) (bool, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -76,10 +64,10 @@ func readState(ctx context.Context, s *State) (bool, error) {
 		return false, errors.New("can't read update time")
 	}
 	updateTime := t.(string)
-	if s.time == updateTime {
+	if s.Time == updateTime {
 		return false, nil
 	}
-	s.time = updateTime
+	s.Time = updateTime
 
 	bat, err := c.client.Battery(ctx)
 	if err != nil {
@@ -117,7 +105,7 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 			}
 		}
 		reauthFlag = false
-		changed, err := readState(ctx, s)
+		changed, err := ReadState(ctx, s)
 		if err != nil {
 			reauthFlag = true
 			log.Println("error during poll: ", err)
