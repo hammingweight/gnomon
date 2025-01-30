@@ -22,19 +22,14 @@ type client struct {
 var c client
 
 type State struct {
-	Power         int
-	Soc           int
-	Load          int
-	EssentialOnly bool
-	time          string
+	Power int
+	Soc   int
+	Load  int
+	time  string
 }
 
 func (s State) String() string {
-	whichLoads := "all loads"
-	if s.EssentialOnly {
-		whichLoads = "only essential loads"
-	}
-	return fmt.Sprintf("The inverter is powering %s. Input power = %dW, Battery SOC = %d%%, Load = %dW.", whichLoads, s.Power, s.Soc, s.Load)
+	return fmt.Sprintf("Input power = %dW, Battery SOC = %d%%, Load = %dW.", s.Power, s.Soc, s.Load)
 }
 
 func Authenticate(ctx context.Context) {
@@ -85,12 +80,6 @@ func readState(ctx context.Context, s *State) (bool, error) {
 		return false, nil
 	}
 	s.time = updateTime
-
-	inv, err := c.client.Inverter(ctx)
-	if err != nil {
-		return false, err
-	}
-	s.EssentialOnly = inv.EssentialOnly()
 
 	bat, err := c.client.Battery(ctx)
 	if err != nil {
@@ -194,5 +183,20 @@ func GetDischargeThreshold() (int, error) {
 			continue
 		}
 		return inv.BatteryCapacity()
+	}
+}
+
+func EssentialOnly() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	ctx := context.Background()
+
+	for {
+		inv, err := c.client.Inverter(ctx)
+		if err != nil {
+			Authenticate(ctx)
+			continue
+		}
+		return inv.EssentialOnly()
 	}
 }

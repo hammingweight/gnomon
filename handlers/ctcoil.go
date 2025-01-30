@@ -40,20 +40,20 @@ func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) b
 	return averagePower < inverterPower/8 && soc < thresholdSoc+40
 }
 
-func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) error {
+func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
 	if switchOn(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power all loads")
-		return rest.UpdateEssentialOnly(false)
+		return false, rest.UpdateEssentialOnly(false)
 	}
-	return nil
+	return true, nil
 }
 
-func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) error {
+func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
 	if switchOff(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power only the essential loads")
-		return rest.UpdateEssentialOnly(true)
+		return true, rest.UpdateEssentialOnly(true)
 	}
-	return nil
+	return false, nil
 }
 
 func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) {
@@ -69,6 +69,7 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 	powerReadings := make([]int, 4)
 	var inverterPower int
 	var threshold int
+	var essentialOnly bool
 	var err error
 	for {
 		select {
@@ -78,6 +79,7 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 				log.Println("Failed to read inverter's rated power: ", err)
 				continue
 			}
+			essentialOnly = rest.EssentialOnly()
 			threshold, err = rest.GetDischargeThreshold()
 			if err != nil {
 				log.Println("Failed to read discharge threshold: ", err)
@@ -98,10 +100,10 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 			powerReadings = append(powerReadings, s.Power)
 			averagePower := average(powerReadings)
 			var err error
-			if s.EssentialOnly {
-				err = handleEssentialOnly(averagePower, inverterPower, s.Soc, threshold)
+			if essentialOnly {
+				essentialOnly, err = handleEssentialOnly(averagePower, inverterPower, s.Soc, threshold)
 			} else {
-				err = handleAllLoads(averagePower, inverterPower, s.Soc, threshold)
+				essentialOnly, err = handleAllLoads(averagePower, inverterPower, s.Soc, threshold)
 			}
 			if err != nil {
 				log.Println("Failed to reconfigure inverter: ", err)

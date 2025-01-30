@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -28,7 +29,34 @@ import (
 
 var Version string = "1.0.0"
 
+func setupLogging(logfile string) (*os.File, error) {
+	if logfile == "" {
+		return nil, nil
+	}
+
+	f, err := os.OpenFile(logfile, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		return nil, err
+	}
+	log.SetOutput(f)
+	return f, nil
+}
+
 func run(cmd *cobra.Command) error {
+	logfile, err := cmd.Flags().GetString("logfile")
+	if err != nil {
+		return err
+	}
+	f, err := setupLogging(logfile)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if f != nil {
+			f.Close()
+		}
+	}()
+
 	start, err := startTime.Until()
 	if err != nil {
 		return err
@@ -82,4 +110,5 @@ func init() {
 	gnomonCmd.Flags().StringP("config", "c", configFile, "synkctl config file path")
 	gnomonCmd.Flags().VarP(&startTime, "start", "s", "start time in 24 hour HH:MM format, e.g. 06:00")
 	gnomonCmd.Flags().VarP(&endTime, "end", "e", "end time in 24 hour HH:MM format, e.g. 19:30")
+	gnomonCmd.Flags().StringP("logfile", "l", "", "log file path")
 }
