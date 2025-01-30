@@ -9,10 +9,12 @@ import (
 	"github.com/hammingweight/gnomon/rest"
 )
 
-func Execute(start time.Duration, runTime time.Duration, configFile string) error {
-	log.Printf("Waiting for %s to start...\n", start)
+func Execute(start time.Duration, runTime time.Duration, configFile string, ct bool) error {
+	if start >= time.Minute {
+		log.Printf("Waiting for %s to start...\n", start)
+	}
 	<-time.Tick(start)
-	log.Println("Starting inverter management")
+	log.Println("Started")
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, runTime)
 	defer cancel()
@@ -27,11 +29,16 @@ func Execute(start time.Duration, runTime time.Duration, configFile string) erro
 	socChan := make(chan rest.State)
 	go SocHandler(ctx, wg, socChan)
 
-	wg.Add(1)
-	ctChan := make(chan rest.State)
-	go CtCoilHandler(ctx, wg, ctChan)
+	chans := []chan rest.State{displayChan, socChan}
 
-	fanout := Fanout(displayChan /*, socChan, ctChan*/)
+	if ct {
+		wg.Add(1)
+		ctChan := make(chan rest.State)
+		go CtCoilHandler(ctx, wg, ctChan)
+		chans = append(chans, ctChan)
+	}
+
+	fanout := Fanout(chans...)
 
 	go rest.Poll(ctx, configFile, fanout)
 

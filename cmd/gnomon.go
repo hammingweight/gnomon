@@ -77,7 +77,11 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	return handlers.Execute(start, runTime, configFile)
+	ct, err := cmd.Flags().GetBool("ct-coil")
+	if err != nil {
+		return err
+	}
+	return handlers.Execute(start, runTime, configFile, ct)
 }
 
 var startTime HhMm
@@ -111,4 +115,5 @@ func init() {
 	gnomonCmd.Flags().VarP(&startTime, "start", "s", "start time in 24 hour HH:MM format, e.g. 06:00")
 	gnomonCmd.Flags().VarP(&endTime, "end", "e", "end time in 24 hour HH:MM format, e.g. 19:30")
 	gnomonCmd.Flags().StringP("logfile", "l", "", "log file path")
+	gnomonCmd.Flags().BoolP("ct-coil", "C", false, "manage power to the essential/non-essential loads")
 }

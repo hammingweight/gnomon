@@ -9,6 +9,7 @@ import (
 )
 
 func SocHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) {
+	log.Println("Managing battery depth of discharge")
 	defer wg.Done()
 
 	var threshold int

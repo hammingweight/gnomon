@@ -57,6 +57,7 @@ func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int)
 }
 
 func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) {
+	log.Println("Managing power to the CT")
 	defer wg.Done()
 	defer func() {
 		log.Println("Shutting down; configuring inverter to power only the essential loads")
@@ -66,7 +67,7 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 		}
 	}()
 
-	powerReadings := make([]int, 4)
+	powerReadings := []int{}
 	var inverterPower int
 	var threshold int
 	var essentialOnly bool
@@ -96,8 +97,10 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 		case <-ctx.Done():
 			return
 		case s := <-ch:
-			powerReadings = powerReadings[1:]
 			powerReadings = append(powerReadings, s.Power)
+			if len(powerReadings) > 4 {
+				powerReadings = powerReadings[len(powerReadings)-4:]
+			}
 			averagePower := average(powerReadings)
 			var err error
 			if essentialOnly {
