@@ -68,18 +68,25 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 
 	powerReadings := make([]int, 4)
 	var inverterPower int
+	var threshold int
 	var err error
 	for {
 		select {
 		case <-ch:
+			inverterPower, err = rest.GetInverterPower()
+			if err != nil {
+				log.Println("Failed to read inverter's rated power: ", err)
+				continue
+			}
+			threshold, err = rest.GetDischargeThreshold()
+			if err != nil {
+				log.Println("Failed to read discharge threshold: ", err)
+				continue
+			}
 		case <-ctx.Done():
 			return
 		}
-		inverterPower, err = rest.GetInverterPower()
-		if err == nil {
-			break
-		}
-		log.Println("Failed to read inverter's rated power: ", err)
+		break
 	}
 
 	for {
@@ -92,9 +99,9 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 			averagePower := average(powerReadings)
 			var err error
 			if s.EssentialOnly {
-				err = handleEssentialOnly(averagePower, inverterPower, s.Soc, s.Threshold)
+				err = handleEssentialOnly(averagePower, inverterPower, s.Soc, threshold)
 			} else {
-				err = handleAllLoads(averagePower, inverterPower, s.Soc, s.Threshold)
+				err = handleAllLoads(averagePower, inverterPower, s.Soc, threshold)
 			}
 			if err != nil {
 				log.Println("Failed to reconfigure inverter: ", err)

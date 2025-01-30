@@ -26,7 +26,6 @@ type State struct {
 	Soc           int
 	Load          int
 	EssentialOnly bool
-	Threshold     int
 	time          string
 }
 
@@ -91,11 +90,6 @@ func readState(ctx context.Context, s *State) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	bc, err := inv.BatteryCapacity()
-	if err != nil {
-		return false, err
-	}
-	s.Threshold = bc
 	s.EssentialOnly = inv.EssentialOnly()
 
 	bat, err := c.client.Battery(ctx)
@@ -185,5 +179,20 @@ func GetInverterPower() (int, error) {
 			continue
 		}
 		return details.RatedPower()
+	}
+}
+
+func GetDischargeThreshold() (int, error) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	ctx := context.Background()
+
+	for {
+		inv, err := c.client.Inverter(ctx)
+		if err != nil {
+			Authenticate(ctx)
+			continue
+		}
+		return inv.BatteryCapacity()
 	}
 }
