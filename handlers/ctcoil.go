@@ -1,3 +1,19 @@
+/*
+Copyright 2025 Carl Meijer.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package handlers
 
 import (
@@ -5,7 +21,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/hammingweight/gnomon/rest"
+	"github.com/hammingweight/gnomon/api"
 )
 
 func average(l []int) int {
@@ -43,7 +59,7 @@ func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) b
 func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
 	if switchOn(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power all loads")
-		return false, rest.UpdateEssentialOnly(false)
+		return false, api.UpdateEssentialOnly(false)
 	}
 	return true, nil
 }
@@ -51,17 +67,19 @@ func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold
 func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
 	if switchOff(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power only the essential loads")
-		return true, rest.UpdateEssentialOnly(true)
+		return true, api.UpdateEssentialOnly(true)
 	}
 	return false, nil
 }
 
-func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) {
+// CtCoilHandler enables or disables power flowing from the inverter to non-essential
+// circuits depending on the battery's SoC and the input power.
+func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 	log.Println("Managing power to the CT")
 	defer wg.Done()
 	defer func() {
 		log.Println("Shutting down; configuring inverter to power only the essential loads")
-		err := rest.UpdateEssentialOnly(true)
+		err := api.UpdateEssentialOnly(true)
 		if err != nil {
 			log.Println("Failed to update inverter's settings: ", err)
 		}
@@ -75,13 +93,13 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan rest.State) 
 	for {
 		select {
 		case <-ch:
-			inverterPower, err = rest.GetInverterPower()
+			inverterPower, err = api.InverterRatedPower()
 			if err != nil {
 				log.Println("Failed to read inverter's rated power: ", err)
 				continue
 			}
-			essentialOnly = rest.EssentialOnly()
-			threshold, err = rest.GetDischargeThreshold()
+			essentialOnly = api.EssentialOnly()
+			threshold, err = api.BatteryDischargeThreshold()
 			if err != nil {
 				log.Println("Failed to read discharge threshold: ", err)
 				continue

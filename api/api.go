@@ -1,4 +1,22 @@
-package rest
+/*
+Copyright 2025 Carl Meijer.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+// Package api makes calls to the SunSynk API to read inverter statistics
+// and to update settings.
+package api
 
 import (
 	"context"
@@ -124,6 +142,8 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 	}
 }
 
+// UpdateBatteryCapacity sets the battery's depth of discharge before
+// the inverter will switch to grid power.
 func UpdateBatteryCapacity(cap int) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -137,6 +157,8 @@ func UpdateBatteryCapacity(cap int) error {
 	return c.client.UpdateInverter(ctx, inv)
 }
 
+// UpdateEssentialOnly sets whether the inverter should power all circuits (true)
+// or should power all loads (false).
 func UpdateEssentialOnly(eo bool) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -150,7 +172,8 @@ func UpdateEssentialOnly(eo bool) error {
 	return c.client.UpdateInverter(ctx, inv)
 }
 
-func GetInverterPower() (int, error) {
+// InverterRatedPower returns the rated power of the inverter.
+func InverterRatedPower() (int, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	ctx := context.Background()
@@ -165,7 +188,10 @@ func GetInverterPower() (int, error) {
 	}
 }
 
-func GetDischargeThreshold() (int, error) {
+// BatteryDischargeThreshold returns the percentage SoC of the battery at
+// which the inverter will use the grid rather than the battery to power
+// the loads.
+func BatteryDischargeThreshold() (int, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	ctx := context.Background()
@@ -180,6 +206,8 @@ func GetDischargeThreshold() (int, error) {
 	}
 }
 
+// EssentialOnly returns true if the inverter should power only the essential
+// circuits and returns false if the inverter should power all loads.
 func EssentialOnly() bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()

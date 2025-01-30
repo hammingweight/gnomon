@@ -14,25 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handlers
+package api
 
-import (
-	"context"
-	"log"
-	"sync"
+import "fmt"
 
-	"github.com/hammingweight/gnomon/api"
-)
+// State represents the state of the inverter: input power, battery SoC, load power and the
+// time at which the measurements were taken.
+type State struct {
+	Power int
+	Soc   int
+	Load  int
+	Time  string
+}
 
-// DisplayHandler displays the state of the inverter whenever it changes.
-func DisplayHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
-	defer wg.Done()
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case state := <-ch:
-			log.Println(state)
-		}
-	}
+func (s State) String() string {
+	return fmt.Sprintf("Input power = %dW, Battery SOC = %d%%, Load = %dW.", s.Power, s.Soc, s.Load)
 }
