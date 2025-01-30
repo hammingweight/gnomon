@@ -10,7 +10,8 @@ import (
 // HH:MM format.
 type HhMm string
 
-// Sets a clock time and validates the time.
+// Set sets a clock time and validates that the string argument is in
+// the expected 24 hour clock format.
 func (hhmm *HhMm) Set(s string) error {
 	if s == "" {
 		return nil

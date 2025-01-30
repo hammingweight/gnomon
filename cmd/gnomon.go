@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -27,23 +26,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is injected by the build.
 var Version string = "1.0.0"
 
-func setupLogging(logfile string) (*os.File, error) {
-	if logfile == "" {
-		return nil, nil
-	}
-
-	f, err := os.OpenFile(logfile, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0600)
-	if err != nil {
-		return nil, err
-	}
-	log.SetOutput(f)
-	return f, nil
-}
-
-func getStartDelayAndRunningTime() (time.Duration, time.Duration, error) {
-	start, err := startTime.Until()
+func getDelayAndRunningTime() (time.Duration, time.Duration, error) {
+	delay, err := startTime.Until()
 	if err != nil {
 		return 0, 0, err
 	}
@@ -56,11 +43,11 @@ func getStartDelayAndRunningTime() (time.Duration, time.Duration, error) {
 			return 0, 0, err
 		}
 	}
-	if end < start {
+	if end < delay {
 		end += 24 * time.Hour
 	}
-	runTime := end - start
-	return start, runTime, nil
+	runTime := end - delay
+	return delay, runTime, nil
 }
 
 func run(cmd *cobra.Command) error {
@@ -69,18 +56,9 @@ func run(cmd *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	f, err := setupLogging(logfile)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if f != nil {
-			f.Close()
-		}
-	}()
 
 	// Find when to start running and for how long.
-	delay, runTime, err := getStartDelayAndRunningTime()
+	delay, runTime, err := getDelayAndRunningTime()
 	if err != nil {
 		return err
 	}
@@ -98,7 +76,7 @@ func run(cmd *cobra.Command) error {
 	}
 
 	// Start managing.
-	return handlers.ManageInverter(delay, runTime, configFile, ct)
+	return handlers.ManageInverter(logfile, delay, runTime, configFile, ct)
 }
 
 var startTime HhMm

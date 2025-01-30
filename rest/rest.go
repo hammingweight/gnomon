@@ -20,7 +20,7 @@ type client struct {
 
 var c client
 
-func Authenticate(ctx context.Context) {
+func authenticate(ctx context.Context) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -43,6 +43,10 @@ func Authenticate(ctx context.Context) {
 	}
 }
 
+// ReadState reads the current state of the inverter. The state must
+// be passed as a pointer; the reference state will be updated if the
+// SunSynk API returns fresh data. This function returns false if the
+// state is unchanged.
 func ReadState(ctx context.Context, s *State) (bool, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -90,13 +94,15 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	return true, nil
 }
 
+// Poll polls the SunSynk API and sends changes to the channel passed
+// as an argument.
 func Poll(ctx context.Context, configFile string, ch chan State) {
 	reauthFlag := true
 	c.configFile = configFile
 	s := &State{}
 	for {
 		if reauthFlag {
-			Authenticate(ctx)
+			authenticate(ctx)
 		} else {
 			select {
 			case <-time.Tick(time.Minute):
@@ -152,7 +158,7 @@ func GetInverterPower() (int, error) {
 	for {
 		details, err := c.client.Details(ctx)
 		if err != nil {
-			Authenticate(ctx)
+			authenticate(ctx)
 			continue
 		}
 		return details.RatedPower()
@@ -167,7 +173,7 @@ func GetDischargeThreshold() (int, error) {
 	for {
 		inv, err := c.client.Inverter(ctx)
 		if err != nil {
-			Authenticate(ctx)
+			authenticate(ctx)
 			continue
 		}
 		return inv.BatteryCapacity()
@@ -182,7 +188,7 @@ func EssentialOnly() bool {
 	for {
 		inv, err := c.client.Inverter(ctx)
 		if err != nil {
-			Authenticate(ctx)
+			authenticate(ctx)
 			continue
 		}
 		return inv.EssentialOnly()
