@@ -27,7 +27,7 @@ import (
 )
 
 // Version is injected by the build.
-var Version string = "1.0.0"
+var Version string = ""
 
 func getDelayAndRunningTime() (time.Duration, time.Duration, error) {
 	delay, err := startTime.Until()
