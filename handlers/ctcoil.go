@@ -123,6 +123,15 @@ func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int)
 	}
 }
 
+func manageCoil(averagePower int, inverterPower int, soc int, threshold int) {
+	essentialOnly := api.EssentialOnly()
+	if essentialOnly {
+		handleEssentialOnly(averagePower, inverterPower, soc, threshold)
+	} else {
+		handleAllLoads(averagePower, inverterPower, soc, threshold)
+	}
+}
+
 // CtCoilHandler enables or disables power flowing from the inverter to non-essential
 // circuits depending on the battery's SoC and the input power.
 func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
@@ -168,13 +177,8 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 			if len(powerReadings) > 4 {
 				powerReadings = powerReadings[len(powerReadings)-4:]
 			}
-			essentialOnly := api.EssentialOnly()
 			averagePower := average(powerReadings)
-			if essentialOnly {
-				handleEssentialOnly(averagePower, inverterPower, s.Soc, threshold)
-			} else {
-				handleAllLoads(averagePower, inverterPower, s.Soc, threshold)
-			}
+			manageCoil(averagePower, inverterPower, s.Soc, threshold)
 		}
 	}
 }
