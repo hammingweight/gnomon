@@ -68,18 +68,23 @@ L:
 		}
 	}
 
-	if maxSoc == 100 {
-		threshold -= 10
-		if threshold < lowBatteryCap+10 {
-			threshold = lowBatteryCap + 10
-		}
-	} else if maxSoc == 99 {
+	if maxSoc == 99 {
 		log.Println("Leaving battery depth of discharge unchanged")
 		return
-	} else if maxSoc < 80 && threshold < maxSoc {
-		threshold = 80
+	} else if maxSoc == 100 {
+		threshold -= 10
+	} else if maxSoc < 80 {
+		threshold += 10
 	} else {
 		threshold += 2
+	}
+
+	// Sanity checks
+	if threshold < lowBatteryCap+10 {
+		threshold = lowBatteryCap + 10
+	}
+	if threshold > 100 {
+		threshold = 100
 	}
 
 	log.Printf("Setting battery depth of discharge to %d%%\n", threshold)
