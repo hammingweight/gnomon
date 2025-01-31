@@ -53,8 +53,19 @@ func lowerTriggerOffSoc(threshold int) int {
 	return threshold + 10
 }
 
+func triggerOnPower(ratedPower int, threshold int, soc int) int {
+	pu := ratedPower / 8
+	pl := ratedPower / 4
+	su := upperTriggerOnSoc(threshold)
+	sl := lowerTriggerOnSoc(threshold)
+	p := pl + (pu-pl)*(sl-soc)/(sl-su)
+	return p
+}
+
 func switchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
-	if soc >= upperTriggerOnSoc(thresholdSoc) {
+	triggerSoc := upperTriggerOnSoc(thresholdSoc)
+	if soc >= triggerSoc {
+		log.Printf("Battery SOC, %d%%, is above %d%%", soc, triggerSoc)
 		return true
 	}
 
@@ -62,11 +73,18 @@ func switchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bo
 		return false
 	}
 
-	return averagePower > inverterPower/4
+	turnOnPower := triggerOnPower(inverterPower, thresholdSoc, soc)
+	if averagePower > turnOnPower {
+		log.Printf("Average input power, %dW, is above %dW", averagePower, turnOnPower)
+		return true
+	}
+	return false
 }
 
 func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
-	if soc <= lowerTriggerOffSoc(thresholdSoc) {
+	triggerSoc := lowerTriggerOffSoc(thresholdSoc)
+	if soc <= triggerSoc {
+		log.Printf("Battery SOC, %d%%, is below %d%%", soc, triggerSoc)
 		return true
 	}
 
@@ -74,7 +92,12 @@ func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) b
 		return false
 	}
 
-	return averagePower < inverterPower/8 && soc < upperTriggerOnSoc(thresholdSoc)
+	turnoffPower := inverterPower / 8
+	if averagePower < turnoffPower && soc < upperTriggerOnSoc(thresholdSoc) {
+		log.Printf("Average input power, %dW, is below %dW", averagePower, turnoffPower)
+		return true
+	}
+	return false
 }
 
 func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
