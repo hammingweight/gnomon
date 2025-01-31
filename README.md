@@ -83,3 +83,12 @@ $ gnomon -C
 2025/01/31 16:23:28 Managing battery depth of discharge
 2025/01/31 16:23:29 Input power = 1125W, Battery SOC = 84%, Load = 88W
 ```
+
+### Running *gnomon* as a cron jo 
+While you can run *gnomon* manually, it's a better idea to run it daily using `cron` or as a Kubernetes `CronJob`. For example, 
+with this as a `crontab` entry to run **gnomon** for 12 hours starting at 6:00AM
+
+```
+00 06 * * * gnomon -C -l /home/carl/gnomon.logs
+
+```
