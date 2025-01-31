@@ -32,12 +32,33 @@ func average(l []int) int {
 	return s / len(l)
 }
 
+// upperTriggerOnSoc is the SOC at which the inverter should power
+// non-essential loads irrespective of the input power.
+func upperTriggerOnSoc(threshold int) int {
+	if threshold+40 > 80 {
+		return threshold + 40
+	}
+	return 80
+}
+
+// lowerTriggerOnSoc is the lowest SOC at which the inverter should power
+// non-essential loads (but only if the input power exceeds some power threshold).
+func lowerTriggerOnSoc(threshold int) int {
+	return threshold + 20
+}
+
+// lowerTriggerSoc is the SOC at which the inverter should power only
+// the essential loads irrespective of the input power
+func lowerTriggerOffSoc(threshold int) int {
+	return threshold + 10
+}
+
 func switchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
-	if soc >= thresholdSoc+40 {
+	if soc >= upperTriggerOnSoc(thresholdSoc) {
 		return true
 	}
 
-	if soc < thresholdSoc+20 {
+	if soc < lowerTriggerOnSoc(thresholdSoc) {
 		return false
 	}
 
@@ -45,7 +66,7 @@ func switchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bo
 }
 
 func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
-	if soc <= thresholdSoc+10 {
+	if soc <= lowerTriggerOffSoc(thresholdSoc) {
 		return true
 	}
 
@@ -53,7 +74,7 @@ func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) b
 		return false
 	}
 
-	return averagePower < inverterPower/8 && soc < thresholdSoc+40
+	return averagePower < inverterPower/8 && soc < upperTriggerOnSoc(thresholdSoc)
 }
 
 func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
