@@ -25,6 +25,9 @@ import (
 )
 
 func average(l []int) int {
+	if len(l) == 0 {
+		return 0
+	}
 	s := 0
 	for _, v := range l {
 		s += v
@@ -62,7 +65,7 @@ func triggerOnPower(ratedPower int, threshold int, soc int) int {
 	return p
 }
 
-func switchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
+func shouldSwitchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
 	triggerSoc := upperTriggerOnSoc(thresholdSoc)
 	if soc >= triggerSoc {
 		log.Printf("Battery SOC, %d%%, is above %d%%", soc, triggerSoc)
@@ -81,7 +84,7 @@ func switchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bo
 	return false
 }
 
-func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
+func shouldSwitchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
 	triggerSoc := lowerTriggerOffSoc(thresholdSoc)
 	if soc <= triggerSoc {
 		log.Printf("Battery SOC, %d%%, is below %d%%", soc, triggerSoc)
@@ -100,20 +103,24 @@ func switchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) b
 	return false
 }
 
-func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
-	if switchOn(averagePower, inverterPower, soc, threshold) {
+func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) {
+	if shouldSwitchOn(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power all loads")
-		return false, api.UpdateEssentialOnly(false)
+		err := api.UpdateEssentialOnly(false)
+		if err != nil {
+			log.Println("Failed to enable CT coil: ", err)
+		}
 	}
-	return true, nil
 }
 
-func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) (bool, error) {
-	if switchOff(averagePower, inverterPower, soc, threshold) {
+func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) {
+	if shouldSwitchOff(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power only the essential loads")
-		return true, api.UpdateEssentialOnly(true)
+		err := api.UpdateEssentialOnly(true)
+		if err != nil {
+			log.Println("Failed to disable CT coil: ", err)
+		}
 	}
-	return false, nil
 }
 
 // CtCoilHandler enables or disables power flowing from the inverter to non-essential
@@ -132,7 +139,6 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 	powerReadings := []int{}
 	var inverterPower int
 	var threshold int
-	var essentialOnly bool
 	var err error
 	for {
 		select {
@@ -142,7 +148,6 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 				log.Println("Failed to read inverter's rated power: ", err)
 				continue
 			}
-			essentialOnly = api.EssentialOnly()
 			threshold, err = api.BatteryDischargeThreshold()
 			if err != nil {
 				log.Println("Failed to read discharge threshold: ", err)
@@ -163,15 +168,12 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 			if len(powerReadings) > 4 {
 				powerReadings = powerReadings[len(powerReadings)-4:]
 			}
+			essentialOnly := api.EssentialOnly()
 			averagePower := average(powerReadings)
-			var err error
 			if essentialOnly {
-				essentialOnly, err = handleEssentialOnly(averagePower, inverterPower, s.Soc, threshold)
+				handleEssentialOnly(averagePower, inverterPower, s.Soc, threshold)
 			} else {
-				essentialOnly, err = handleAllLoads(averagePower, inverterPower, s.Soc, threshold)
-			}
-			if err != nil {
-				log.Println("Failed to reconfigure inverter: ", err)
+				handleAllLoads(averagePower, inverterPower, s.Soc, threshold)
 			}
 		}
 	}
