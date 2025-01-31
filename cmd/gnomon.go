@@ -83,8 +83,11 @@ var startTime HhMm
 var endTime HhMm
 
 var gnomonCmd = &cobra.Command{
-	Use:     "gnomon",
-	Short:   "Manages a SunSynk inverter's settings",
+	Use:   "gnomon",
+	Short: "Manages a SunSynk inverter's settings",
+	Long: `gnomon is a tool for automatically managing a SunSynk inverter's settings.
+It adjusts the depth of discharge of the battery and, optionally, can decide when to
+allow the inverter to power non-essential loads.`,
 	Args:    cobra.ExactArgs(0),
 	Version: Version,
 	RunE: func(cmd *cobra.Command, args []string) error {
