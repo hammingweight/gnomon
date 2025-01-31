@@ -123,8 +123,8 @@ func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int)
 	}
 }
 
-func manageCoil(averagePower int, inverterPower int, soc int, threshold int) {
-	essentialOnly := api.EssentialOnly()
+func manageCoil(ctx context.Context, averagePower int, inverterPower int, soc int, threshold int) {
+	essentialOnly := api.EssentialOnly(ctx)
 	if essentialOnly {
 		handleEssentialOnly(averagePower, inverterPower, soc, threshold)
 	} else {
@@ -152,12 +152,12 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 	for {
 		select {
 		case <-ch:
-			inverterPower, err = api.InverterRatedPower()
+			inverterPower, err = api.InverterRatedPower(ctx)
 			if err != nil {
 				log.Println("Failed to read inverter's rated power: ", err)
 				continue
 			}
-			threshold, err = api.BatteryDischargeThreshold()
+			threshold, err = api.BatteryDischargeThreshold(ctx)
 			if err != nil {
 				log.Println("Failed to read discharge threshold: ", err)
 				continue
@@ -178,7 +178,7 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 				powerReadings = powerReadings[len(powerReadings)-4:]
 			}
 			averagePower := average(powerReadings)
-			manageCoil(averagePower, inverterPower, s.Soc, threshold)
+			manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
 		}
 	}
 }

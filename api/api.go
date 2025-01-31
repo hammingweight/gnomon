@@ -173,12 +173,14 @@ func UpdateEssentialOnly(eo bool) error {
 }
 
 // InverterRatedPower returns the rated power of the inverter.
-func InverterRatedPower() (int, error) {
+func InverterRatedPower(ctx context.Context) (int, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	ctx := context.Background()
 
 	for {
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
 		details, err := c.client.Details(ctx)
 		if err != nil {
 			authenticate(ctx)
@@ -191,12 +193,14 @@ func InverterRatedPower() (int, error) {
 // BatteryDischargeThreshold returns the percentage SoC of the battery at
 // which the inverter will use the grid rather than the battery to power
 // the loads.
-func BatteryDischargeThreshold() (int, error) {
+func BatteryDischargeThreshold(ctx context.Context) (int, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	ctx := context.Background()
 
 	for {
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
 		inv, err := c.client.Inverter(ctx)
 		if err != nil {
 			authenticate(ctx)
@@ -208,12 +212,14 @@ func BatteryDischargeThreshold() (int, error) {
 
 // EssentialOnly returns true if the inverter should power only the essential
 // circuits and returns false if the inverter should power all loads.
-func EssentialOnly() bool {
+func EssentialOnly(ctx context.Context) bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	ctx := context.Background()
 
 	for {
+		if ctx.Err() != nil {
+			return true
+		}
 		inv, err := c.client.Inverter(ctx)
 		if err != nil {
 			authenticate(ctx)

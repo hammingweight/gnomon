@@ -36,7 +36,7 @@ func SocHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 	for {
 		select {
 		case <-ch:
-			threshold, err = api.BatteryDischargeThreshold()
+			threshold, err = api.BatteryDischargeThreshold(ctx)
 			if err != nil {
 				log.Println("Failed to read discharge threshold: ", err)
 				continue
