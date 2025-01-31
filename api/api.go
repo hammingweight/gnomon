@@ -228,3 +228,22 @@ func EssentialOnly(ctx context.Context) bool {
 		return inv.EssentialOnly()
 	}
 }
+
+// LowBatteryCapacity returns the SoC that generates a low
+// battery capacity alarm.
+func LowBatteryCapacity(ctx context.Context) (int, error) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	for {
+		if ctx.Err() != nil {
+			return 0, ctx.Err()
+		}
+		inverter, err := c.client.Inverter(ctx)
+		if err != nil {
+			authenticate(ctx)
+			continue
+		}
+		return inverter.BatteryLowCapacity(), nil
+	}
+}

@@ -31,7 +31,7 @@ func SocHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 	defer wg.Done()
 
 	var threshold int
-	var maxSoc int
+	var lowBatteryCap int
 	var err error
 	for {
 		select {
@@ -41,12 +41,18 @@ func SocHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 				log.Println("Failed to read discharge threshold: ", err)
 				continue
 			}
+			lowBatteryCap, err = api.LowBatteryCapacity(ctx)
+			if err != nil {
+				log.Println("Failed to read low battery capacity: ", err)
+				continue
+			}
 		case <-ctx.Done():
 			return
 		}
 		break
 	}
 
+	var maxSoc int
 L:
 	for {
 		select {
@@ -62,22 +68,21 @@ L:
 		}
 	}
 
-	if maxSoc == 99 {
-		return
-	}
 	if maxSoc == 100 {
 		threshold -= 10
-		if threshold < 30 {
-			threshold = 30
+		if threshold < lowBatteryCap+10 {
+			threshold = lowBatteryCap + 10
 		}
+	} else if maxSoc == 99 {
+		log.Println("Leaving battery depth of discharge unchanged")
+		return
+	} else if maxSoc < 80 && threshold < maxSoc {
+		threshold = 80
 	} else {
 		threshold += 2
-		if threshold > 100 {
-			threshold = 100
-		}
 	}
 
-	log.Printf("Setting battery discharge threshold to %d%%\n", threshold)
+	log.Printf("Setting battery depth of discharge to %d%%\n", threshold)
 	err = api.UpdateBatteryCapacity(threshold)
 	if err != nil {
 		log.Println("updating battery capacity failed: ", err)
