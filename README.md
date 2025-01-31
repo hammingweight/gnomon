@@ -36,5 +36,50 @@ $ synkctl configuration generate -u carl@example.com -p "VerySecret" -i 24010101
 Running **gnomon** with a `--help` flag shows the options
 
 ```
+$ gnomon --help
+gnomon is a tool for automatically managing a SunSynk inverter's settings.
+It adjusts the depth of discharge of the battery and, optionally, can decide when to
+allow the inverter to power non-essential loads.
+
+Usage:
+  gnomon [flags]
+
+Flags:
+  -c, --config string    synkctl config file path (default "/home/carl/.synk/config")
+  -C, --ct-coil          manage power to the non-essential load
+  -e, --end HH:MM        end time in 24 hour HH:MM format, e.g. 19:30
+  -h, --help             help for gnomon
+  -l, --logfile string   log file path
+  -s, --start HH:MM      start time in 24 hour HH:MM format, e.g. 06:00
+  -v, --version          version for gnomon
 ```
 
+For example, to run the script so that it starts managing the inverter at 5:00AM, stops managing at 7:30PM, overrides the default configuration file ("myconfig"), logs to a file "gnomon.logs" and manages
+the CT coil to control whether the grid or inverter should power the non-essential loads, run **gnomon** with the following flags
+
+```
+gnomon -s 05:00 -e 19:00 -c myconfig -l gnomon.log -C
+
+```
+
+All, flags are optional and simply running
+
+```
+$ gnomon
+```
+will:
+* start managing the inverter immediately (i.e. a start time of 'now')
+* end management of the inverter in 12 hours
+* use the default configuration file
+* write logs to stdout
+* not manage power to the non-essential loads
+
+The following is a snippet of the first few lines logged by **gnomon** when managing power to the non-essential load (via the CT coil)
+
+```
+$ gnomon -C
+2025/01/31 16:23:28 Started
+2025/01/31 16:23:28 Managing power to the CT
+2025/01/31 16:23:28 Managing battery depth of discharge
+2025/01/31 16:23:29 Input power = 1125W, Battery SOC = 84%, Load = 88W
+```
