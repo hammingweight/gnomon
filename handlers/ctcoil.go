@@ -56,6 +56,9 @@ func lowerTriggerOffSoc(threshold int) int {
 	return threshold + 10
 }
 
+// triggerOnPower returns the minimum input power that is needed to allow
+// the inverter to power non-essential loads. The higher the battery SoC,
+// the lower the input power needed.
 func triggerOnPower(ratedPower int, threshold int, soc int) int {
 	pu := ratedPower / 8
 	pl := ratedPower / 4
@@ -65,6 +68,8 @@ func triggerOnPower(ratedPower int, threshold int, soc int) int {
 	return p
 }
 
+// shouldSwitchOn returns true if the SoC and input power are high enough to
+// justify powering the non-essential loads from the inverter.
 func shouldSwitchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
 	triggerSoc := upperTriggerOnSoc(thresholdSoc)
 	if soc >= triggerSoc {
@@ -84,6 +89,8 @@ func shouldSwitchOn(averagePower int, inverterPower int, soc int, thresholdSoc i
 	return false
 }
 
+// shouldSwitchOff returns true if the SoC or power are low and the inverter should
+// not power non-essential circuits.
 func shouldSwitchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
 	triggerSoc := lowerTriggerOffSoc(thresholdSoc)
 	if soc <= triggerSoc {
