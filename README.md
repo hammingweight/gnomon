@@ -8,7 +8,7 @@ intended for small installations where:
 **gnomon** should run once a day, from sunrise to sunset. At the end of the running time, **gnomon** sets the maximum depth of discharge for the battery. Typically, a greater discharge depth will be configured in summer than in winter. The tool's goal is to maximize the amount of solar energy that is generated while ensuring that the battery has sufficient charge to handle power outages.
 
 The software can also choose whether to power non-essential loads from the inverter (the inputs and battery) or from the grid.  **gnomon**'s heuristics use
-on the battery's state of charge and how much power is being supplied by the inputs. In practice, **gnomon** will primarily 
+the battery's state of charge and how much power is being supplied by the inputs. In practice, **gnomon** will primarily 
 use the grid to power non-essential loads in winter or overcast days. On long, clear summer days, **gnomon** will try to use less grid power while maintaining a reasonable
 battery state of charge.
 
