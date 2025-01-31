@@ -92,3 +92,13 @@ with this as a `crontab` entry to run **gnomon** starting at 6:00AM (and ending 
 00 06 * * * gnomon -C -e 20:00 -l /home/carl/gnomon.logs
 
 ```
+
+## Important Note: Permissions
+If the logs show that updating the inverter settings failed with a messages like
+
+```
+2025/01/31 21:00:00 Setting battery depth of discharge to 80%
+2025/01/31 21:00:01 updating battery capacity failed:  No Permissions
+```
+
+you need to upgrade your account from end-user to installer by completing an [online form submission](https://www.sunsynk.org/remote-monitoring).
