@@ -73,8 +73,8 @@ L:
 		return
 	} else if maxSoc == 100 {
 		threshold -= 10
-	} else if maxSoc < 80 {
-		threshold += 10
+	} else if maxSoc <= 88 {
+		threshold = 90
 	} else {
 		threshold += 2
 	}
