@@ -20,6 +20,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/hammingweight/gnomon/api"
 )
@@ -139,13 +140,15 @@ func manageCoil(ctx context.Context, averagePower int, inverterPower int, soc in
 	}
 }
 
-// CtCoilHandler enables or disables power flowing from the inverter to non-essential
-// circuits depending on the battery's SoC and the input power.
-func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
-	log.Println("Managing power to the CT")
+// GeyserHandler enables or disables power flowing from the inverter to the geyser
+// depending on the battery's SoC, the input power and the time of day.
+func GeyserHandler(ctx context.Context, wg *sync.WaitGroup, startDelay time.Duration, endDelay time.Duration, ch chan api.State) {
+	startChan := time.Tick(startDelay)
+	endChan := time.Tick(endDelay)
+	log.Println("Waiting for geyser to come on in ", startDelay)
 	defer wg.Done()
 	defer func() {
-		log.Println("Shutting down; configuring inverter to power only the essential loads")
+		log.Println("Configuring inverter to power only the essential loads")
 		err := api.UpdateEssentialOnly(true)
 		if err != nil {
 			log.Println("Failed to update inverter's settings: ", err)
@@ -175,6 +178,36 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 		break
 	}
 
+L2:
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case s := <-ch:
+			powerReadings = append(powerReadings, s.Power)
+			if len(powerReadings) > 4 {
+				powerReadings = powerReadings[len(powerReadings)-4:]
+			}
+			//averagePower := average(powerReadings)
+			//manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
+		case <-startChan:
+			break L2
+		}
+	}
+
+	log.Println("The geyser has come on")
+	averagePower := average(powerReadings)
+	s := &api.State{}
+	for {
+		_, err = api.ReadState(ctx, s)
+		if err == nil {
+			break
+		}
+		time.Sleep(15 * time.Second)
+	}
+	manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
+
+	firstStateUpdate := true
 	for {
 		select {
 		case <-ctx.Done():
@@ -186,6 +219,16 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 			}
 			averagePower := average(powerReadings)
 			manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
+			if !firstStateUpdate {
+				if s.Load < 2000 {
+					log.Printf("Inverter load: %dW\n", s.Load)
+					return
+				}
+			}
+			firstStateUpdate = false
+		case <-endChan:
+			log.Println("The geyser has been switched off")
+			return
 		}
 	}
 }

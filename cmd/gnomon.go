@@ -73,14 +73,16 @@ func run(cmd *cobra.Command) error {
 		return err
 	}
 
-	// Must the CT coil be enabled/disabled?
-	ct, err := cmd.Flags().GetBool("ct-coil")
-	if err != nil {
-		return err
-	}
+	// Geyser1
+	g1Start := HhMm("08:59")
+	g1Delay, _ := g1Start.Until()
+
+	// Geyser2
+	g2Start := HhMm("10:29")
+	g2Delay, _ := g2Start.Until()
 
 	// Start managing.
-	return handlers.ManageInverter(logfile, delay, runTime, configFile, minSoc.Int(), ct)
+	return handlers.ManageInverter(logfile, delay, runTime, configFile, minSoc.Int(), g1Delay, g2Delay)
 }
 
 var gnomonCmd = &cobra.Command{
@@ -114,6 +116,5 @@ func init() {
 	gnomonCmd.Flags().VarP(&startTime, "start", "s", "start time in 24 hour HH:MM format, e.g. 06:00")
 	gnomonCmd.Flags().VarP(&endTime, "end", "e", "end time in 24 hour HH:MM format, e.g. 19:30")
 	gnomonCmd.Flags().StringP("logfile", "l", "", "log file path")
-	gnomonCmd.Flags().BoolP("ct-coil", "C", false, "manage power to the non-essential load")
 	gnomonCmd.Flags().VarP(&minSoc, "min-soc", "m", "minimum battery state of charge")
 }
