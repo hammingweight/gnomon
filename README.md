@@ -90,7 +90,6 @@ with this as a `crontab` entry to run **gnomon** starting at 6:00AM (and ending 
 
 ```
 00 06 * * * gnomon -C -e 20:00 -l /home/carl/gnomon.logs
-
 ```
 
 ## Important Note: Permissions
