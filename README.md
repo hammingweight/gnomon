@@ -73,7 +73,7 @@ will:
 * end management of the inverter in 12 hours
 * use the default configuration file
 * write logs to stdout
-* set the minimum battery SoC to the low battery SoC + 20%
+* set the minimum battery SoC to the low battery SoC plus 20%
 * not manage power to the non-essential loads
 
 The following is a snippet of the first few lines logged by **gnomon** when managing power to the non-essential load (via the CT coil)
@@ -84,6 +84,7 @@ $ gnomon -C
 2025/01/31 16:23:28 Managing power to the CT
 2025/01/31 16:23:28 Managing battery depth of discharge
 2025/01/31 16:23:29 Input power = 1125W, Battery SOC = 84%, Load = 88W
+2025/01/31 16:23:29 Minimum battery SoC = 40%
 ```
 
 ### Running *gnomon* as a cron job
