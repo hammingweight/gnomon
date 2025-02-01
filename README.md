@@ -60,7 +60,6 @@ the CT coil to control whether the grid or inverter should power the non-essenti
 
 ```
 gnomon -s 05:00 -e 19:00 -c myconfig -l gnomon.log -C
-
 ```
 
 All, flags are optional and simply running
