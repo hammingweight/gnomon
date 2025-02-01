@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -64,20 +65,19 @@ func (hhmm *HhMm) Until() (time.Duration, error) {
 		return time.Nanosecond, nil
 	}
 
-	// This is some hackery to use Go's time functions to get how long we have to
-	// wait by prepending a date to the time and then subtracting the time that
-	// has elapsed since midnight on that date.
 	now := time.Now()
-	tm, _ := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("2006-01-02 %s:00", hhmm))
-	tm = tm.AddDate(now.Year()-2006, int(now.Month())-1, now.Day()-2)
-	_, offset := now.Zone()
-	tm = tm.Add(time.Duration(-offset) * time.Second)
+	e := strings.Split(string(*hhmm), ":")
+	h, err := strconv.Atoi(e[0])
+	if err != nil {
+		return 0, err
+	}
+	m, err := strconv.Atoi(e[1])
+	if err != nil {
+		return 0, err
+	}
+	tm := time.Date(now.Year(), now.Month(), now.Day(), h, m, 0, 0, now.Location())
 	d := time.Until(tm)
-	for {
-		if d > 0 {
-			break
-		}
-		// If d < 0, then wait until the next day.
+	if d < 0 {
 		d += 24 * time.Hour
 	}
 	return d, nil
