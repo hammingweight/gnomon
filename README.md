@@ -1,4 +1,5 @@
 # gnomon
+<img src="/images/gnomon.jpg" align="right" width="200px">
 
 **gnomon** is a tool that monitors a SunSynk<sup>:registered:</sup> hybrid inverter and updates the inverter's settings based on the battery state of charge and input power. **gnomon** is
 intended for small installations where:
