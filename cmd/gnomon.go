@@ -50,6 +50,10 @@ func getDelayAndRunningTime() (time.Duration, time.Duration, error) {
 	return delay, runTime, nil
 }
 
+var startTime HhMm
+var endTime HhMm
+var minSoc SoC = SoC(-1)
+
 func run(cmd *cobra.Command) error {
 	// Set up logging
 	logfile, err := cmd.Flags().GetString("logfile")
@@ -76,11 +80,8 @@ func run(cmd *cobra.Command) error {
 	}
 
 	// Start managing.
-	return handlers.ManageInverter(logfile, delay, runTime, configFile, ct)
+	return handlers.ManageInverter(logfile, delay, runTime, configFile, minSoc.Int(), ct)
 }
-
-var startTime HhMm
-var endTime HhMm
 
 var gnomonCmd = &cobra.Command{
 	Use:   "gnomon",
@@ -114,4 +115,5 @@ func init() {
 	gnomonCmd.Flags().VarP(&endTime, "end", "e", "end time in 24 hour HH:MM format, e.g. 19:30")
 	gnomonCmd.Flags().StringP("logfile", "l", "", "log file path")
 	gnomonCmd.Flags().BoolP("ct-coil", "C", false, "manage power to the non-essential load")
+	gnomonCmd.Flags().VarP(&minSoc, "min-soc", "m", "minimum battery state of charge")
 }

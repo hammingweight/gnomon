@@ -51,15 +51,16 @@ Flags:
   -e, --end HH:MM        end time in 24 hour HH:MM format, e.g. 19:30
   -h, --help             help for gnomon
   -l, --logfile string   log file path
+  -m, --min-soc SoC      minimum battery state of charge
   -s, --start HH:MM      start time in 24 hour HH:MM format, e.g. 06:00
   -v, --version          version for gnomon
 ```
 
-For example, to run the script so that it starts managing the inverter at 5:00AM, stops managing at 7:30PM, overrides the default configuration file ("myconfig"), logs to a file "gnomon.logs" and manages
+For example, to run the script so that it starts managing the inverter at 5:00AM, stops managing at 7:30PM, overrides the default configuration file ("myconfig"), logs to a file "gnomon.logs", won't allow the battery state of charge to drop below 40%, and manages
 the CT coil to control whether the grid or inverter should power the non-essential loads, run **gnomon** with the following flags
 
 ```
-gnomon -s 05:00 -e 19:00 -c myconfig -l gnomon.log -C
+gnomon -s 05:00 -e 19:00 -c myconfig -l gnomon.log -m 40 -C
 ```
 
 All, flags are optional and simply running
@@ -72,6 +73,7 @@ will:
 * end management of the inverter in 12 hours
 * use the default configuration file
 * write logs to stdout
+* set the minimum battery SoC to the low battery SoC + 20%
 * not manage power to the non-essential loads
 
 The following is a snippet of the first few lines logged by **gnomon** when managing power to the non-essential load (via the CT coil)

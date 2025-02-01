@@ -26,12 +26,11 @@ import (
 
 // SocHandler watches the battery's SoC and determines how to adjust the depth of
 // discharge of the battery.
-func SocHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
+func SocHandler(ctx context.Context, wg *sync.WaitGroup, minSoc int, ch chan api.State) {
 	log.Println("Managing battery depth of discharge")
 	defer wg.Done()
 
 	var threshold int
-	var lowBatteryCap int
 	var err error
 	for {
 		select {
@@ -41,11 +40,19 @@ func SocHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 				log.Println("Failed to read discharge threshold: ", err)
 				continue
 			}
+			var lowBatteryCap int
 			lowBatteryCap, err = api.LowBatteryCapacity(ctx)
 			if err != nil {
 				log.Println("Failed to read low battery capacity: ", err)
 				continue
 			}
+			if minSoc < 0 {
+				minSoc = lowBatteryCap + 20
+			} else if minSoc < lowBatteryCap {
+				log.Printf("Specified minimum battery SoC = %d%% is too low\n", minSoc)
+				minSoc = lowBatteryCap
+			}
+			log.Printf("Minimum battery SoC = %d%%\n", minSoc)
 		case <-ctx.Done():
 			return
 		}
@@ -80,8 +87,8 @@ L:
 	}
 
 	// Sanity checks
-	if threshold < lowBatteryCap+10 {
-		threshold = lowBatteryCap + 10
+	if threshold < minSoc {
+		threshold = minSoc
 	}
 	if threshold > 100 {
 		threshold = 100

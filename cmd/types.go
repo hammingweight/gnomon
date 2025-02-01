@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -80,4 +81,37 @@ func (hhmm *HhMm) Until() (time.Duration, error) {
 		d += 24 * time.Hour
 	}
 	return d, nil
+}
+
+// SoC represent a battery's state of charge
+type SoC int
+
+// Set sets a battery state of charge.
+func (soc *SoC) Set(s string) error {
+	socInt, err := strconv.Atoi(s)
+	if err != nil {
+		return err
+	}
+	if socInt < 0 || socInt > 100 {
+		return fmt.Errorf("battery SoC must be in the range 0-100, not %d", socInt)
+	}
+	*soc = SoC(socInt)
+	return nil
+}
+
+// Type returns "SoC" as the type.
+func (soc *SoC) Type() string {
+	return "SoC"
+}
+
+func (soc *SoC) String() string {
+	if *soc < 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d", int(*soc))
+}
+
+// Int converts a SoC to an int.
+func (soc *SoC) Int() int {
+	return int(*soc)
 }
