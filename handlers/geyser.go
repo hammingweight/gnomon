@@ -149,9 +149,15 @@ func GeyserHandler(ctx context.Context, wg *sync.WaitGroup, startDelay time.Dura
 	defer wg.Done()
 	defer func() {
 		log.Println("Configuring inverter to power only the essential loads")
-		err := api.UpdateEssentialOnly(true)
-		if err != nil {
-			log.Println("Failed to update inverter's settings: ", err)
+		for i := 0; i < 10; i++ {
+			err := api.UpdateEssentialOnly(true)
+			if err != nil {
+				log.Println("Failed to update inverter's settings: ", err)
+			}
+			time.Sleep(30 * time.Second)
+			if api.EssentialOnly(context.Background()) {
+				break
+			}
 		}
 	}()
 
