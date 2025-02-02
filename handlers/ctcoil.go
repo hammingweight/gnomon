@@ -145,12 +145,12 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 	log.Println("Starting power management to the CT")
 	defer wg.Done()
 	defer func() {
-		log.Println("Ending power management to the CT")
 		log.Println("Configuring inverter to power only the essential loads")
 		err := api.UpdateEssentialOnly(true)
 		if err != nil {
 			log.Println("Failed to update inverter's settings: ", err)
 		}
+		log.Println("Finished power management to the CT")
 	}()
 
 	powerReadings := []int{}

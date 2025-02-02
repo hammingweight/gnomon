@@ -27,8 +27,9 @@ import (
 // SocHandler watches the battery's SoC and determines how to adjust the depth of
 // discharge of the battery.
 func SocHandler(ctx context.Context, wg *sync.WaitGroup, minSoc int, ch chan api.State) {
-	log.Println("Managing battery depth of discharge")
+	log.Println("Starting management of the battery SOC")
 	defer wg.Done()
+	defer log.Println("Finished management of the battery SOC")
 
 	var threshold int
 	var err error
