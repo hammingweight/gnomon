@@ -142,10 +142,11 @@ func manageCoil(ctx context.Context, averagePower int, inverterPower int, soc in
 // CtCoilHandler enables or disables power flowing from the inverter to non-essential
 // circuits depending on the battery's SoC and the input power.
 func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
-	log.Println("Managing power to the CT")
+	log.Println("Starting power management to the CT")
 	defer wg.Done()
 	defer func() {
-		log.Println("Shutting down; configuring inverter to power only the essential loads")
+		log.Println("Ending power management to the CT")
+		log.Println("Configuring inverter to power only the essential loads")
 		err := api.UpdateEssentialOnly(true)
 		if err != nil {
 			log.Println("Failed to update inverter's settings: ", err)

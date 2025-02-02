@@ -81,7 +81,7 @@ The following is a snippet of the first few lines logged by **gnomon** when mana
 ```
 $ gnomon -C
 2025/01/31 16:23:28 Started
-2025/01/31 16:23:28 Managing power to the CT
+2025/01/31 16:23:28 Starting power management to the CT
 2025/01/31 16:23:28 Managing battery depth of discharge
 2025/01/31 16:23:29 Input power = 1125W, Battery SOC = 84%, Load = 88W
 2025/01/31 16:23:29 Minimum battery SoC = 40%
