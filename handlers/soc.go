@@ -76,7 +76,7 @@ L:
 	}
 
 	if maxSoc == 99 {
-		log.Println("Leaving battery depth of discharge unchanged")
+		log.Println("Leaving battery's minimum SoC unchanged")
 		return
 	} else if maxSoc == 100 {
 		threshold -= 10
@@ -95,7 +95,7 @@ L:
 		threshold = 100
 	}
 
-	log.Printf("Setting battery depth of discharge to %d%%\n", threshold)
+	log.Printf("Setting battery's minimum SoC to %d%%\n", threshold)
 	err = api.UpdateBatteryCapacity(threshold)
 	if err != nil {
 		log.Println("updating battery capacity failed: ", err)
