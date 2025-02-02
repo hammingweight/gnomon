@@ -49,10 +49,10 @@ func SocHandler(ctx context.Context, wg *sync.WaitGroup, minSoc int, ch chan api
 			if minSoc < 0 {
 				minSoc = lowBatteryCap + 20
 			} else if minSoc < lowBatteryCap {
-				log.Printf("Specified minimum battery SoC = %d%% is too low\n", minSoc)
+				log.Printf("Specified minimum battery SOC = %d%% is too low\n", minSoc)
 				minSoc = lowBatteryCap
 			}
-			log.Printf("Minimum battery SoC = %d%%\n", minSoc)
+			log.Printf("Minimum battery SOC = %d%%\n", minSoc)
 		case <-ctx.Done():
 			return
 		}
@@ -76,7 +76,7 @@ L:
 	}
 
 	if maxSoc == 99 {
-		log.Println("Leaving battery's minimum SoC unchanged")
+		log.Println("Leaving battery's minimum SOC unchanged")
 		return
 	} else if maxSoc == 100 {
 		threshold -= 10
@@ -95,9 +95,9 @@ L:
 		threshold = 100
 	}
 
-	log.Printf("Setting battery's minimum SoC to %d%%\n", threshold)
+	log.Printf("Setting battery's minimum SOC to %d%%\n", threshold)
 	err = api.UpdateBatteryCapacity(threshold)
 	if err != nil {
-		log.Println("updating battery capacity failed: ", err)
+		log.Println("Updating battery capacity failed: ", err)
 	}
 }
