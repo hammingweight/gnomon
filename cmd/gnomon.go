@@ -98,8 +98,7 @@ allow the inverter to power non-essential loads.`,
 
 // Execute is called by main.main() and executes the gnomon command.
 func Execute() {
-	err := gnomonCmd.Execute()
-	if err != nil {
+	if err := gnomonCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }

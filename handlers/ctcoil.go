@@ -113,8 +113,7 @@ func shouldSwitchOff(averagePower int, inverterPower int, soc int, thresholdSoc 
 func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) {
 	if shouldSwitchOn(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power all loads")
-		err := api.UpdateEssentialOnly(false)
-		if err != nil {
+		if err := api.UpdateEssentialOnly(false); err != nil {
 			log.Println("Failed to enable CT coil: ", err)
 		}
 	}
@@ -123,8 +122,7 @@ func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold
 func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) {
 	if shouldSwitchOff(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power only essential loads")
-		err := api.UpdateEssentialOnly(true)
-		if err != nil {
+		if err := api.UpdateEssentialOnly(true); err != nil {
 			log.Println("Failed to disable CT coil: ", err)
 		}
 	}
@@ -146,8 +144,7 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 	defer wg.Done()
 	defer func() {
 		log.Println("Configuring inverter to power only essential loads")
-		err := api.UpdateEssentialOnly(true)
-		if err != nil {
+		if err := api.UpdateEssentialOnly(true); err != nil {
 			log.Println("Failed to update inverter's settings: ", err)
 		}
 		log.Println("Finished power management to the CT")
