@@ -96,7 +96,7 @@ with this as a `crontab` entry to run **gnomon** starting at 6:00AM (and ending 
 ```
 
 ## Important Note: Permissions
-If the logs show that updating the inverter settings failed with a messages like
+If the logs show that updating the inverter settings failed with messages like
 
 ```
 2025/01/31 21:00:00 Setting battery depth of discharge to 80%
