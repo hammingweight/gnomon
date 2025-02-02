@@ -34,6 +34,9 @@ func (hhmm *HhMm) Set(s string) error {
 	if s == "" {
 		return nil
 	}
+	if len(s) == 4 {
+		s = "0" + s
+	}
 	ok, err := regexp.Match(`^\d\d:\d\d$`, []byte(s))
 	if err != nil {
 		return fmt.Errorf("%s is not in the form HH:MM, %w", s, err)
