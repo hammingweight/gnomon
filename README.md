@@ -103,4 +103,4 @@ If the logs show that updating the inverter settings failed with messages like
 2025/01/31 21:00:01 updating battery capacity failed:  No Permissions
 ```
 
-you need to upgrade your account from end-user to installer by completing an [online form submission](https://www.sunsynk.org/remote-monitoring).
+you need to upgrade your SunSynk<sup>:registered:</sup> account from end-user to installer by completing an [online form submission](https://www.sunsynk.org/remote-monitoring).
