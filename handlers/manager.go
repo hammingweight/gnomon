@@ -59,7 +59,7 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 		log.Printf("Waiting for %s to start...\n", delay)
 	}
 	time.Sleep(delay)
-	log.Println("Started management of the inverter")
+	log.Println("Starting management of the inverter")
 
 	// Set up a context that will expire after the specified timeout, at which point this code
 	// will stop managing the inverter.
@@ -97,6 +97,6 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	go api.Poll(ctx, configFile, fanout)
 
 	wg.Wait()
-	log.Println("Completed management of the inverter")
+	log.Println("Finished management of the inverter")
 	return nil
 }
