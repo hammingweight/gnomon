@@ -77,10 +77,7 @@ L:
 		}
 	}
 
-	if maxSoc == 99 {
-		log.Println("Leaving battery's minimum SOC unchanged")
-		return
-	} else if maxSoc == 100 {
+	if maxSoc == 100 {
 		threshold = 9 * threshold / 10
 	} else {
 		r := math.Pow(100.0/float64(maxSoc), 0.5)
