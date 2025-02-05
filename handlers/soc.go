@@ -19,6 +19,7 @@ package handlers
 import (
 	"context"
 	"log"
+	"math"
 	"sync"
 
 	"github.com/hammingweight/gnomon/api"
@@ -80,10 +81,14 @@ L:
 		log.Println("Leaving battery's minimum SOC unchanged")
 		return
 	} else if maxSoc == 100 {
-		threshold -= 10
+		threshold = 9 * threshold / 10
 	} else {
-		delta := 100 - maxSoc
-		threshold += delta/2 + 1
+		r := math.Pow(100.0/float64(maxSoc), 1.0/3.0)
+		newThreshold := int(r * float64(threshold))
+		if newThreshold-threshold < 2 {
+			newThreshold = threshold + 2
+		}
+		threshold = newThreshold
 	}
 
 	// Sanity checks
