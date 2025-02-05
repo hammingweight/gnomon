@@ -56,11 +56,11 @@ Flags:
   -v, --version          version for gnomon
 ```
 
-For example, to run the script so that it starts managing the inverter at 5:00AM, stops managing at 7:30PM, overrides the default configuration file ("myconfig"), logs to a file "gnomon.logs", won't allow the battery state of charge to drop below 40%, and manages
+For example, to run the script so that it starts managing the inverter at 5:00AM, stops managing at 7:30PM, overrides the default configuration file ("myconfig"), logs to a file "gnomon.log", won't allow the battery state of charge to drop below 40%, and manages
 the CT coil to control whether the grid or inverter should power the non-essential loads, run **gnomon** with the following flags
 
 ```
-gnomon -s 05:00 -e 19:00 -c myconfig -l gnomon.log -m 40 -C
+gnomon -s 05:00 -e 19:30 -c myconfig -l gnomon.log -m 40 -C
 ```
 
 All flags are optional and simply running
@@ -103,4 +103,4 @@ If the logs show that updating the inverter settings failed with messages like
 2025/01/31 21:00:01 updating battery capacity failed:  No Permissions
 ```
 
-you need to upgrade your account from end-user to installer by completing an [online form submission](https://www.sunsynk.org/remote-monitoring).
+you need to upgrade your SunSynk<sup>:registered:</sup> account from end-user to installer by completing an [online form submission](https://www.sunsynk.org/remote-monitoring).
