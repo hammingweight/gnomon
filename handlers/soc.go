@@ -83,7 +83,7 @@ L:
 	} else if maxSoc == 100 {
 		threshold = 9 * threshold / 10
 	} else {
-		r := math.Pow(100.0/float64(maxSoc), 1.0/3.0)
+		r := math.Pow(100.0/float64(maxSoc), 0.5)
 		newThreshold := int(r * float64(threshold))
 		if newThreshold-threshold < 2 {
 			newThreshold = threshold + 2
