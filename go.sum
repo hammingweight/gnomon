@@ -19,6 +19,8 @@ github.com/hammingweight/synkctl v1.6.1 h1:Rmg0O9ykJmxzB6iFQVWkeYuS9YuhORtBG3Ty+
 github.com/hammingweight/synkctl v1.6.1/go.mod h1:UejRYiWGApBZTg9P+saXK3p66qeIDRTRFAmuLGVDxx8=
 github.com/hammingweight/synkctl v1.6.2 h1:vSb4X241P92SVM2aiWfMZN/SeoSq55KOf/pglOCZaUo=
 github.com/hammingweight/synkctl v1.6.2/go.mod h1:UejRYiWGApBZTg9P+saXK3p66qeIDRTRFAmuLGVDxx8=
+github.com/hammingweight/synkctl v1.6.6 h1:ga6Ahmb23B2AEDZTBx+vkgmQ/fclwMKRsrNd1LO4Kcw=
+github.com/hammingweight/synkctl v1.6.6/go.mod h1:UejRYiWGApBZTg9P+saXK3p66qeIDRTRFAmuLGVDxx8=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
