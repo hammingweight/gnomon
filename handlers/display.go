@@ -19,14 +19,12 @@ package handlers
 import (
 	"context"
 	"log"
-	"sync"
 
 	"github.com/hammingweight/gnomon/api"
 )
 
 // DisplayHandler displays the state of the inverter whenever it changes.
-func DisplayHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
-	defer wg.Done()
+func DisplayHandler(ctx context.Context, ch chan api.State) {
 	for {
 		select {
 		case <-ctx.Done():

@@ -68,12 +68,11 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	defer cancel()
 
 	// Add a handler to display the inverter's statistics.
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
 	displayChan := make(chan api.State)
-	go DisplayHandler(ctx, wg, displayChan)
+	go DisplayHandler(ctx, displayChan)
 
 	// Add a handler to manage the battery's depth of discharge.
+	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	socChan := make(chan api.State)
 	go SocHandler(ctx, wg, minSoc, socChan)
@@ -97,6 +96,10 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	go api.Poll(ctx, configFile, fanout)
 
 	wg.Wait()
-	log.Println("Finished management of the inverter")
+	if ctx.Err() != nil {
+		log.Println("Deadline has expired; exiting")
+	} else {
+		log.Println("Handlers have finished managing the inverter; exiting early")
+	}
 	return nil
 }
