@@ -118,7 +118,7 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 	reauthFlag := true
 	c.configFile = configFile
 	s := &State{}
-	delay := time.Minute
+	delay := 30 * time.Second
 	for {
 		if reauthFlag {
 			authenticate(ctx)
@@ -139,9 +139,9 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 		}
 		if changed {
 			ch <- *s
-			delay = 4 * time.Minute
+			delay = 5 * time.Minute
 		} else {
-			delay = time.Minute
+			delay = 30 * time.Second
 		}
 	}
 }
