@@ -118,12 +118,13 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 	reauthFlag := true
 	c.configFile = configFile
 	s := &State{}
+	delay := time.Minute
 	for {
 		if reauthFlag {
 			authenticate(ctx)
 		} else {
 			select {
-			case <-time.Tick(time.Minute):
+			case <-time.Tick(delay):
 			case <-ctx.Done():
 				return
 			}
@@ -138,6 +139,9 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 		}
 		if changed {
 			ch <- *s
+			delay = 4 * time.Minute
+		} else {
+			delay = time.Minute
 		}
 	}
 }
