@@ -42,9 +42,10 @@ func authenticate(ctx context.Context) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
+	log.Println("Authenticating")
 	cfg, err := configuration.ReadConfigurationFromFile(c.configFile)
 	if err != nil {
-		log.Println("error authenticating: ", err)
+		log.Println("Error authenticating: ", err)
 		os.Exit(1)
 	}
 	for {
@@ -56,7 +57,7 @@ func authenticate(ctx context.Context) {
 			c.client = client
 			return
 		}
-		log.Println("failed to authenticate: ", err)
+		log.Println("Failed to authenticate: ", err)
 		time.Sleep(30 * time.Second)
 	}
 }
@@ -123,6 +124,7 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 	for {
 		if reauthFlag {
 			authenticate(ctx)
+			firstChange = true
 		} else {
 			select {
 			case <-time.Tick(delay):
@@ -134,7 +136,7 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 		changed, err := ReadState(ctx, s)
 		if err != nil {
 			reauthFlag = true
-			log.Println("error during poll: ", err)
+			log.Println("Error during poll: ", err)
 			time.Sleep(30 * time.Second)
 			continue
 		}
