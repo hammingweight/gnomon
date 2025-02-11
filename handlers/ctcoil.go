@@ -24,6 +24,8 @@ import (
 	"github.com/hammingweight/gnomon/api"
 )
 
+const maxReadings = 3
+
 func average(l []int) int {
 	if len(l) == 0 {
 		return 0
@@ -53,7 +55,7 @@ func lowerTriggerOnSoc(threshold int) int {
 // lowerTriggerSoc is the SOC at which the inverter should power only
 // the essential loads irrespective of the input power
 func lowerTriggerOffSoc(threshold int) int {
-	return threshold + 10
+	return threshold + 12
 }
 
 // triggerOnPower returns the minimum input power that is needed to allow
@@ -179,8 +181,8 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 			return
 		case s := <-ch:
 			powerReadings = append(powerReadings, s.Power)
-			if len(powerReadings) > 4 {
-				powerReadings = powerReadings[len(powerReadings)-4:]
+			if len(powerReadings) > maxReadings {
+				powerReadings = powerReadings[len(powerReadings)-maxReadings:]
 			}
 			averagePower := average(powerReadings)
 			manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
