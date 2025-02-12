@@ -20,6 +20,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/hammingweight/gnomon/api"
 )
@@ -112,30 +113,46 @@ func shouldSwitchOff(averagePower int, inverterPower int, soc int, thresholdSoc 
 	return false
 }
 
-func handleEssentialOnly(averagePower int, inverterPower int, soc int, threshold int) {
+func handleEssentialOnly(ctx context.Context, averagePower int, inverterPower int, soc int, threshold int) {
 	if shouldSwitchOn(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power all loads")
 		if err := api.UpdateEssentialOnly(false); err != nil {
 			log.Println("Failed to enable CT coil: ", err)
 		}
+		for i := 0; i < 10; i++ {
+			if !api.EssentialOnly(ctx) {
+				log.Println("Successfully updated inverter")
+				return
+			}
+			time.Sleep(10 * time.Second)
+		}
+		log.Println("Failed to update inverter")
 	}
 }
 
-func handleAllLoads(averagePower int, inverterPower int, soc int, threshold int) {
+func handleAllLoads(ctx context.Context, averagePower int, inverterPower int, soc int, threshold int) {
 	if shouldSwitchOff(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power only essential loads")
 		if err := api.UpdateEssentialOnly(true); err != nil {
 			log.Println("Failed to disable CT coil: ", err)
 		}
+		for i := 0; i < 10; i++ {
+			if api.EssentialOnly(ctx) {
+				log.Println("Successfully updated inverter")
+				return
+			}
+			time.Sleep(10 * time.Second)
+		}
+		log.Println("Failed to update inverter")
 	}
 }
 
 func manageCoil(ctx context.Context, averagePower int, inverterPower int, soc int, threshold int) {
 	essentialOnly := api.EssentialOnly(ctx)
 	if essentialOnly {
-		handleEssentialOnly(averagePower, inverterPower, soc, threshold)
+		handleEssentialOnly(ctx, averagePower, inverterPower, soc, threshold)
 	} else {
-		handleAllLoads(averagePower, inverterPower, soc, threshold)
+		handleAllLoads(ctx, averagePower, inverterPower, soc, threshold)
 	}
 }
 
