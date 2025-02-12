@@ -144,7 +144,7 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 		if changed {
 			ch <- *s
 			if !firstChange {
-				delay = 5 * time.Minute
+				delay = 10 * time.Minute
 			}
 			firstChange = false
 		}
