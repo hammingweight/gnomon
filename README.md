@@ -81,6 +81,7 @@ The following is a snippet of the first few lines logged by **gnomon** when mana
 ```
 $ gnomon -C
 2025/01/31 16:23:28 Starting management of the inverter
+2025/01/31 16:23:28 Authenticating
 2025/01/31 16:23:28 Starting power management to the CT
 2025/01/31 16:23:28 Starting management of the battery SOC
 2025/01/31 16:23:29 Input power = 1125W, Battery SOC = 84%, Load = 88W
