@@ -25,7 +25,7 @@ import (
 	"github.com/hammingweight/gnomon/api"
 )
 
-const maxReadings = 3
+const maxReadings = 4
 
 func average(l []int) int {
 	if len(l) == 0 {
