@@ -239,17 +239,15 @@ L2:
 		case <-ctx.Done():
 			return
 		case s := <-ch:
-			powerReadings = append(powerReadings, s.Power)
-			if len(powerReadings) > 3 {
-				powerReadings = powerReadings[len(powerReadings)-4:]
-			}
+			powerReadings = append(powerReadings, newPowerTime(s.Power))
+			getRecentPowerReadings(&powerReadings)
 		case <-startChan:
 			break L2
 		}
 	}
 
 	log.Println("Starting management of the CT")
-	averagePower := average(powerReadings)
+	averagePower := average(getRecentPowerReadings(&powerReadings))
 	s := &api.State{}
 	for {
 		_, err = api.ReadState(ctx, s)
