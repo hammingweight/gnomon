@@ -26,7 +26,6 @@ import (
 )
 
 func average(l []int) int {
-	log.Println("Number of power readings: ", len(l))
 	if len(l) == 0 {
 		return 0
 	}
