@@ -25,9 +25,8 @@ import (
 	"github.com/hammingweight/gnomon/api"
 )
 
-const maxReadings = 4
-
 func average(l []int) int {
+	log.Println("Number of power readings: ", len(l))
 	if len(l) == 0 {
 		return 0
 	}
@@ -156,6 +155,29 @@ func manageCoil(ctx context.Context, averagePower int, inverterPower int, soc in
 	}
 }
 
+type powerTime struct {
+	power int
+	t     time.Time
+}
+
+func newPowerTime(power int) powerTime {
+	return powerTime{power, time.Now()}
+}
+
+func getRecentPowerReadings(powerTimes *[]powerTime) []int {
+	for {
+		if (*powerTimes)[0].t.After(time.Now().Add(-20 * time.Minute)) {
+			break
+		}
+		*powerTimes = (*powerTimes)[1:]
+	}
+	powers := []int{}
+	for _, v := range *powerTimes {
+		powers = append(powers, v.power)
+	}
+	return powers
+}
+
 // CtCoilHandler enables or disables power flowing from the inverter to non-essential
 // circuits depending on the battery's SoC and the input power.
 func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
@@ -176,7 +198,7 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 		log.Println("Finished power management to the CT")
 	}()
 
-	powerReadings := []int{}
+	powerReadings := []powerTime{}
 	var inverterPower int
 	var threshold int
 	var err error
@@ -204,11 +226,8 @@ func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
 		case <-ctx.Done():
 			return
 		case s := <-ch:
-			powerReadings = append(powerReadings, s.Power)
-			if len(powerReadings) > maxReadings {
-				powerReadings = powerReadings[len(powerReadings)-maxReadings:]
-			}
-			averagePower := average(powerReadings)
+			powerReadings = append(powerReadings, newPowerTime(s.Power))
+			averagePower := average(getRecentPowerReadings(&powerReadings))
 			manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
 		}
 	}
