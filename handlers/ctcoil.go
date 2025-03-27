@@ -55,6 +55,9 @@ func upperTriggerOnSoc(threshold int) int {
 // lowerTriggerOnSoc is the lowest SOC at which the inverter should power
 // non-essential loads (but only if the input power exceeds some power threshold).
 func lowerTriggerOnSoc(threshold int) int {
+	if threshold+20 >= 99 {
+		return 101
+	}
 	return threshold + 20
 }
 
