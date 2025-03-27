@@ -39,10 +39,17 @@ func average(l []int) int {
 // upperTriggerOnSoc is the SOC at which the inverter should power
 // non-essential loads irrespective of the input power.
 func upperTriggerOnSoc(threshold int) int {
-	if threshold+40 > 80 {
-		return threshold + 40
+	if threshold+40 <= 80 {
+		return 80
 	}
-	return 80
+	u := threshold + 40
+	if u > 100 {
+		u = 100
+	}
+	if lowerTriggerOnSoc(threshold) > u {
+		return lowerTriggerOnSoc(threshold)
+	}
+	return u
 }
 
 // lowerTriggerOnSoc is the lowest SOC at which the inverter should power
@@ -65,8 +72,10 @@ func triggerOnPower(ratedPower int, threshold int, soc int) int {
 	pl := ratedPower / 4
 	su := upperTriggerOnSoc(threshold)
 	sl := lowerTriggerOnSoc(threshold)
-	p := pl + (pu-pl)*(sl-soc)/(sl-su)
-	return p
+	if sl != su {
+		return pl + (pu-pl)*(sl-soc)/(sl-su)
+	}
+	return pu
 }
 
 // shouldSwitchOn returns true if the SoC and input power are high enough to
