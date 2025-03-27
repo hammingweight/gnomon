@@ -42,10 +42,7 @@ func upperTriggerOnSoc(threshold int) int {
 	if threshold+40 <= 80 {
 		return 80
 	}
-	u := threshold + 40
-	if u > 99 {
-		u = 99
-	}
+	u := min(threshold+40, 99)
 	if lowerTriggerOnSoc(threshold) > u {
 		return lowerTriggerOnSoc(threshold)
 	}
@@ -75,10 +72,10 @@ func triggerOnPower(ratedPower int, threshold int, soc int) int {
 	pl := ratedPower / 4
 	su := upperTriggerOnSoc(threshold)
 	sl := lowerTriggerOnSoc(threshold)
-	if sl != su {
+	if sl < su {
 		return pl + (pu-pl)*(sl-soc)/(sl-su)
 	}
-	return pu
+	return pl
 }
 
 // shouldSwitchOn returns true if the SoC and input power are high enough to
