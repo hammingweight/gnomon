@@ -43,8 +43,8 @@ func upperTriggerOnSoc(threshold int) int {
 		return 80
 	}
 	u := threshold + 40
-	if u > 100 {
-		u = 100
+	if u > 99 {
+		u = 99
 	}
 	if lowerTriggerOnSoc(threshold) > u {
 		return lowerTriggerOnSoc(threshold)
