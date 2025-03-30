@@ -4,62 +4,62 @@ import "testing"
 
 func TestUpperTriggerOnSoc(t *testing.T) {
 	threshold := 50
-	expected := 90
+	expected := 95
 	actual := upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
 	threshold = 30
-	expected = 80
+	expected = 85
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
 	threshold = 40
-	expected = 80
+	expected = 85
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
-	threshold = 60
+	threshold = 55
 	expected = 99
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
-	threshold = 70
+	threshold = 65
 	expected = 99
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
-	threshold = 78
+	threshold = 73
 	expected = 99
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
-	threshold = 79
+	threshold = 74
 	expected = 101
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
-	threshold = 80
+	threshold = 85
 	expected = 101
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
-	threshold = 90
+	threshold = 95
 	expected = 101
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
