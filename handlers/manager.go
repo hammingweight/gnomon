@@ -83,14 +83,14 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	// Geyser1
 	wg.Add(1)
 	g1Chan := make(chan api.State)
-	e1Delay := g1Delay + 32*time.Minute
+	e1Delay := g1Delay + 31*time.Minute
 	go GeyserHandler(ctx, wg, g1Delay, e1Delay, g1Chan)
 	chans = append(chans, g1Chan)
 
 	// Geyser2
 	wg.Add(1)
 	g2Chan := make(chan api.State)
-	e2Delay := g2Delay + 92*time.Minute
+	e2Delay := g2Delay + 91*time.Minute
 	go GeyserHandler(ctx, wg, g2Delay, e2Delay, g2Chan)
 	chans = append(chans, g2Chan)
 
