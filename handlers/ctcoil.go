@@ -81,7 +81,6 @@ func triggerOnPower(ratedPower int, threshold int, soc int) int {
 func shouldSwitchOn(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
 	triggerSoc := upperTriggerOnSoc(thresholdSoc)
 	if soc >= triggerSoc {
-		log.Printf("Battery SOC, %d%%, is above %d%%", soc, triggerSoc)
 		return true
 	}
 
@@ -90,32 +89,13 @@ func shouldSwitchOn(averagePower int, inverterPower int, soc int, thresholdSoc i
 	}
 
 	turnOnPower := triggerOnPower(inverterPower, thresholdSoc, soc)
-	if averagePower > turnOnPower {
-		log.Printf("Average input power, %dW, is above %dW", averagePower, turnOnPower)
-		return true
-	}
-	return false
+	return averagePower > turnOnPower
 }
 
 // shouldSwitchOff returns true if the SoC or power are low and the inverter should
 // not power non-essential circuits.
 func shouldSwitchOff(averagePower int, inverterPower int, soc int, thresholdSoc int) bool {
-	triggerSoc := lowerTriggerOffSoc(thresholdSoc)
-	if soc <= triggerSoc {
-		log.Printf("Battery SOC, %d%%, is below %d%%", soc, triggerSoc)
-		return true
-	}
-
-	if soc >= 95 {
-		return false
-	}
-
-	turnoffPower := inverterPower / 8
-	if averagePower < turnoffPower && soc < upperTriggerOnSoc(thresholdSoc) {
-		log.Printf("Average input power, %dW, is below %dW", averagePower, turnoffPower)
-		return true
-	}
-	return false
+	return !shouldSwitchOn(averagePower, inverterPower, soc, thresholdSoc)
 }
 
 func handleEssentialOnly(ctx context.Context, averagePower int, inverterPower int, soc int, threshold int) {
