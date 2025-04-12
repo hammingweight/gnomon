@@ -20,6 +20,7 @@ import (
 	"context"
 	"log"
 	"math"
+	"math/rand"
 	"sync"
 
 	"github.com/hammingweight/gnomon/api"
@@ -79,6 +80,9 @@ L:
 
 	if maxSoc == 100 {
 		threshold = 9 * threshold / 10
+	} else if maxSoc == 99 {
+		r := rand.Intn(3) - 1
+		threshold += r
 	} else {
 		r := math.Pow(100.0/float64(maxSoc), 0.5)
 		newThreshold := int(r*float64(threshold) + 0.5)
