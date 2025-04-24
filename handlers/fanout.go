@@ -17,6 +17,7 @@ limitations under the License.
 package handlers
 
 import (
+	"github.com/emicklei/go-restful/v3/log"
 	"github.com/hammingweight/gnomon/api"
 )
 
@@ -24,6 +25,7 @@ import (
 func Fanout(chans ...chan api.State) chan api.State {
 	ch := make(chan api.State)
 	go func() {
+		defer log.Println("Finished fanout")
 		for {
 			v := <-ch
 			for _, c := range chans {
