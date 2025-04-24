@@ -17,7 +17,8 @@ limitations under the License.
 package handlers
 
 import (
-	"github.com/emicklei/go-restful/v3/log"
+	"log"
+
 	"github.com/hammingweight/gnomon/api"
 )
 
