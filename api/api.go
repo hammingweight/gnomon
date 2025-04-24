@@ -116,6 +116,7 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 // Poll polls the SunSynk API and sends changes to the channel passed
 // as an argument.
 func Poll(ctx context.Context, configFile string, ch chan State) {
+	defer log.Println("Finished polling inverter state")
 	reauthFlag := true
 	c.configFile = configFile
 	s := &State{}

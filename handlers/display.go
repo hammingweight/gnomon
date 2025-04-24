@@ -25,6 +25,7 @@ import (
 
 // DisplayHandler displays the state of the inverter whenever it changes.
 func DisplayHandler(ctx context.Context, ch chan api.State) {
+	defer log.Println("Finished displaying inverter state")
 	for {
 		select {
 		case <-ctx.Done():
