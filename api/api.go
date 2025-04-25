@@ -254,6 +254,6 @@ func LowBatteryCapacity(ctx context.Context) (int, error) {
 			authenticate(ctx)
 			continue
 		}
-		return inverter.BatteryLowCapacity(), nil
+		return inverter.BatteryLowCapacity()
 	}
 }
