@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"math/rand"
 	"os"
 	"sync"
 	"time"
@@ -136,9 +137,12 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 		reauthFlag = false
 		changed, err := ReadState(ctx, s)
 		if err != nil {
-			reauthFlag = true
-			log.Println("Error during poll: ", err)
-			time.Sleep(30 * time.Second)
+			// Only reauth for 20% of the errors
+			if rand.Intn(5) == 0 {
+				reauthFlag = true
+				log.Println("Error during poll: ", err)
+				time.Sleep(30 * time.Second)
+			}
 			continue
 		}
 		delay = 15 * time.Second
