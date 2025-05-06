@@ -91,7 +91,6 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	if s.Time == updateTime {
 		return false, nil
 	}
-	s.Time = updateTime
 
 	bat, err := c.client.Battery(ctx)
 	if err != nil {
@@ -111,6 +110,7 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 		return false, err
 	}
 
+	s.Time = updateTime
 	return true, nil
 }
 
