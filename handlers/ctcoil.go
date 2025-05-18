@@ -40,8 +40,8 @@ func average(l []int) int {
 // non-essential loads irrespective of the input power.
 func upperTriggerOnSoc(threshold int) int {
 	u := min(threshold+45, 99)
-	if u <= 85 {
-		return 85
+	if u <= 95 {
+		return 95
 	}
 	l := lowerTriggerOnSoc(threshold)
 	return max(u, l)
