@@ -90,6 +90,9 @@ L:
 		if newThreshold-threshold < 1 {
 			newThreshold = threshold + 1
 		}
+		if newThreshold-threshold > 10 {
+			newThreshold = threshold + 10
+		}
 		threshold = newThreshold
 	}
 
