@@ -63,29 +63,32 @@ func SocHandler(ctx context.Context, wg *sync.WaitGroup, minSoc int, ch chan api
 		break
 	}
 
-	var maxSoc int
+	var maxCharge, minCharge int = 0, 100
 L:
 	for {
 		select {
 		case <-ctx.Done():
 			break L
 		case s := <-ch:
-			if s.Soc > maxSoc {
-				maxSoc = s.Soc
+			if s.Soc > maxCharge {
+				maxCharge = s.Soc
 			}
-			if maxSoc >= 100 {
+			if s.Soc < minCharge {
+				minCharge = s.Soc
+			}
+			if maxCharge >= 100 {
 				break L
 			}
 		}
 	}
 
-	if maxSoc == 100 {
-		threshold = 9 * threshold / 10
-	} else if maxSoc == 99 {
+	if maxCharge == 100 {
+		threshold = 9 * min(minCharge, threshold) / 10
+	} else if maxCharge == 99 {
 		r := rand.Intn(2)
 		threshold += r
 	} else {
-		r := math.Pow(100.0/float64(maxSoc), 0.5)
+		r := math.Pow(100.0/float64(maxCharge), 0.5)
 		newThreshold := int(r * float64(threshold))
 		if newThreshold-threshold < 1 {
 			newThreshold = threshold + 1
