@@ -42,7 +42,7 @@ func setupLogging(logfile string) (*os.File, error) {
 }
 
 // ManageInverter spawns handlers to respond to changes in the inverter's state.
-func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, configFile string, minSoc int, ct bool) error {
+func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, configFile string, minSoc int, deltaSoc int, ct bool) error {
 	// Set up logging
 	f, err := setupLogging(logfile)
 	if err != nil {
@@ -75,7 +75,7 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	socChan := make(chan api.State)
-	go SocHandler(ctx, wg, minSoc, socChan)
+	go SocHandler(ctx, wg, minSoc, deltaSoc, socChan)
 
 	// A slice of channels with handlers to respond to state changes.
 	chans := []chan api.State{displayChan, socChan}

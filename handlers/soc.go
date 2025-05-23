@@ -29,7 +29,7 @@ import (
 
 // SocHandler watches the battery's SoC and determines how to adjust the depth of
 // discharge of the battery.
-func SocHandler(ctx context.Context, wg *sync.WaitGroup, minSoc int, ch chan api.State) {
+func SocHandler(ctx context.Context, wg *sync.WaitGroup, minSoc int, deltaSoc int, ch chan api.State) {
 	log.Println("Starting management of the battery SOC")
 	defer wg.Done()
 	defer log.Println("Finished management of the battery SOC")
@@ -56,7 +56,8 @@ func SocHandler(ctx context.Context, wg *sync.WaitGroup, minSoc int, ch chan api
 				log.Printf("Specified minimum battery SOC = %d%% is too low\n", minSoc)
 				minSoc = lowBatteryCap
 			}
-			log.Printf("Minimum battery SOC = %d%%\n", minSoc)
+			log.Printf("Minimum allowed battery SOC threshold = %d%%\n", minSoc)
+			log.Printf("Maximum change to battery SOC threshold = %d%%\n", deltaSoc)
 		case <-ctx.Done():
 			return
 		}
@@ -80,7 +81,11 @@ L:
 	}
 
 	if maxSoc == 100 {
-		threshold = 9 * threshold / 10
+		newThreshold := 9 * threshold / 10
+		if threshold-newThreshold > deltaSoc {
+			newThreshold = threshold - deltaSoc
+		}
+		threshold = newThreshold
 	} else if maxSoc == 99 {
 		r := rand.Intn(2)
 		threshold += r
@@ -90,8 +95,8 @@ L:
 		if newThreshold-threshold < 1 {
 			newThreshold = threshold + 1
 		}
-		if newThreshold-threshold > 10 {
-			newThreshold = threshold + 10
+		if newThreshold-threshold > deltaSoc {
+			newThreshold = threshold + deltaSoc
 		}
 		threshold = newThreshold
 	}
