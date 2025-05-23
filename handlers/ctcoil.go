@@ -56,6 +56,12 @@ func lowerTriggerOnSoc(threshold int) int {
 	return threshold + 25
 }
 
+// lowerTriggerSoc is the SOC at which the inverter should power only
+// the essential loads irrespective of the input power
+func lowerTriggerOffSoc(threshold int) int {
+	return threshold + 20
+}
+
 // triggerOnPower returns the minimum input power that is needed to allow
 // the inverter to power non-essential loads. The higher the battery SoC,
 // the lower the input power needed.
@@ -95,8 +101,7 @@ func shouldSwitchOff(averagePower int, inverterPower int, soc int, thresholdSoc 
 func handleEssentialOnly(ctx context.Context, averagePower int, inverterPower int, soc int, threshold int) {
 	if shouldSwitchOn(averagePower, inverterPower, soc, threshold) {
 		log.Println("Configuring inverter to power all loads")
-		err := api.UpdateEssentialOnly(false)
-		if err != nil {
+		if err := api.UpdateEssentialOnly(false); err != nil {
 			log.Println("Failed to enable CT coil: ", err)
 		}
 		for i := 0; i < 10; i++ {
@@ -112,9 +117,8 @@ func handleEssentialOnly(ctx context.Context, averagePower int, inverterPower in
 
 func handleAllLoads(ctx context.Context, averagePower int, inverterPower int, soc int, threshold int) {
 	if shouldSwitchOff(averagePower, inverterPower, soc, threshold) {
-		log.Println("Configuring inverter to power only the essential loads")
-		err := api.UpdateEssentialOnly(true)
-		if err != nil {
+		log.Println("Configuring inverter to power only essential loads")
+		if err := api.UpdateEssentialOnly(true); err != nil {
 			log.Println("Failed to disable CT coil: ", err)
 		}
 		for i := 0; i < 10; i++ {
@@ -160,14 +164,11 @@ func getRecentPowerReadings(powerTimes *[]powerTime) []int {
 	return powers
 }
 
-// GeyserHandler enables or disables power flowing from the inverter to the geyser
-// depending on the battery's SoC, the input power and the time of day.
-func GeyserHandler(ctx context.Context, wg *sync.WaitGroup, startDelay time.Duration, endDelay time.Duration, ch chan api.State) {
-	startChan := time.Tick(startDelay)
-	endChan := time.Tick(endDelay)
-	log.Println("Waiting for geyser to come on in ", startDelay)
+// CtCoilHandler enables or disables power flowing from the inverter to non-essential
+// circuits depending on the battery's SoC and the input power.
+func CtCoilHandler(ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
+	log.Println("Starting power management to the CT")
 	defer wg.Done()
-	defer log.Println("Finished management of the CT")
 	defer func() {
 		log.Println("Configuring inverter to power only the essential loads")
 		for i := 0; i < 10; i++ {
@@ -180,6 +181,7 @@ func GeyserHandler(ctx context.Context, wg *sync.WaitGroup, startDelay time.Dura
 				break
 			}
 		}
+		log.Println("Finished power management to the CT")
 	}()
 
 	powerReadings := []powerTime{}
@@ -205,32 +207,6 @@ func GeyserHandler(ctx context.Context, wg *sync.WaitGroup, startDelay time.Dura
 		break
 	}
 
-L2:
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case s := <-ch:
-			powerReadings = append(powerReadings, newPowerTime(s.Power))
-			getRecentPowerReadings(&powerReadings)
-		case <-startChan:
-			break L2
-		}
-	}
-
-	log.Println("Starting management of the CT")
-	averagePower := average(getRecentPowerReadings(&powerReadings))
-	s := &api.State{}
-	for {
-		_, err = api.ReadState(ctx, s)
-		if err == nil {
-			break
-		}
-		time.Sleep(15 * time.Second)
-	}
-	manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
-
-	checkLoad := false
 	for {
 		select {
 		case <-ctx.Done():
@@ -239,16 +215,6 @@ L2:
 			powerReadings = append(powerReadings, newPowerTime(s.Power))
 			averagePower := average(getRecentPowerReadings(&powerReadings))
 			manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
-			if checkLoad {
-				if s.Load < 2000 {
-					log.Printf("Inverter load: %dW\n", s.Load)
-					return
-				}
-			}
-			checkLoad = !api.EssentialOnly(ctx)
-		case <-endChan:
-			log.Println("The geyser has switched off")
-			return
 		}
 	}
 }

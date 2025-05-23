@@ -42,7 +42,7 @@ func setupLogging(logfile string) (*os.File, error) {
 }
 
 // ManageInverter spawns handlers to respond to changes in the inverter's state.
-func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, configFile string, minSoc int, deltaSoc int, g1Delay time.Duration, g2Delay time.Duration) error {
+func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, configFile string, minSoc int, deltaSoc int, ct bool) error {
 	// Set up logging
 	f, err := setupLogging(logfile)
 	if err != nil {
@@ -80,19 +80,14 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	// A slice of channels with handlers to respond to state changes.
 	chans := []chan api.State{displayChan, socChan}
 
-	// Geyser1
-	wg.Add(1)
-	g1Chan := make(chan api.State)
-	e1Delay := g1Delay + 31*time.Minute
-	go GeyserHandler(ctx, wg, g1Delay, e1Delay, g1Chan)
-	chans = append(chans, g1Chan)
-
-	// Geyser2
-	wg.Add(1)
-	g2Chan := make(chan api.State)
-	e2Delay := g2Delay + 91*time.Minute
-	go GeyserHandler(ctx, wg, g2Delay, e2Delay, g2Chan)
-	chans = append(chans, g2Chan)
+	// If the user wants gnomon to enable/disable power to the non-essential circuits,
+	// add a handler.
+	if ct {
+		wg.Add(1)
+		ctChan := make(chan api.State)
+		go CtCoilHandler(ctx, wg, ctChan)
+		chans = append(chans, ctChan)
+	}
 
 	// Create a fanout channel that will relay messages to the handler channels.
 	fanout := Fanout(chans...)
