@@ -56,12 +56,6 @@ func lowerTriggerOnSoc(threshold int) int {
 	return threshold + 25
 }
 
-// lowerTriggerSoc is the SOC at which the inverter should power only
-// the essential loads irrespective of the input power
-func lowerTriggerOffSoc(threshold int) int {
-	return threshold + 20
-}
-
 // triggerOnPower returns the minimum input power that is needed to allow
 // the inverter to power non-essential loads. The higher the battery SoC,
 // the lower the input power needed.
