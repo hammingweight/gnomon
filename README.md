@@ -46,8 +46,9 @@ Usage:
   gnomon [flags]
 
 Flags:
-  -c, --config string    synkctl config file path (default "/home/carl/.synk/config")
+  -c, --config string    synkctl config file path (default "/home/cmeijer/.synk/config")
   -C, --ct-coil          manage power to the non-essential load
+  -d, --delta-soc SoC    maximum change to the battery state of charge (default 5)
   -e, --end HH:MM        end time in 24 hour HH:MM format, e.g. 19:30
   -h, --help             help for gnomon
   -l, --logfile string   log file path
@@ -56,11 +57,11 @@ Flags:
   -v, --version          version for gnomon
 ```
 
-For example, to run the script so that it starts managing the inverter at 5:00AM, stops managing at 7:30PM, overrides the default configuration file ("myconfig"), logs to a file "gnomon.log", won't allow the battery state of charge to drop below 40%, and manages
+For example, to run the script so that it starts managing the inverter at 5:00AM, stops managing at 7:30PM, overrides the default configuration file ("myconfig"), logs to a file "gnomon.log", won't allow the battery state of charge to drop below 40%, will not change the allowed depth of discharge by more than 3%, and manages
 the CT coil to control whether the grid or inverter should power the non-essential loads, run **gnomon** with the following flags
 
 ```
-gnomon -s 05:00 -e 19:30 -c myconfig -l gnomon.log -m 40 -C
+gnomon -s 05:00 -e 19:30 -c myconfig -l gnomon.log -m 40 -d 3 -C
 ```
 
 All flags are optional and simply running
@@ -74,18 +75,20 @@ will:
 * use the default configuration file
 * write logs to stdout
 * set the minimum battery SoC to the low battery SoC plus 20%
+* will not adjust the allowed battery depth of discharge by more than 5%
 * not manage power to the non-essential loads
 
 The following is a snippet of the first few lines logged by **gnomon** when managing power to the non-essential load (via the CT coil)
 
 ```
 $ gnomon -C
-2025/01/31 16:23:28 Starting management of the inverter
-2025/01/31 16:23:28 Authenticating
-2025/01/31 16:23:28 Starting power management to the CT
-2025/01/31 16:23:28 Starting management of the battery SOC
-2025/01/31 16:23:29 Input power = 1125W, Battery SOC = 84%, Load = 88W
-2025/01/31 16:23:29 Minimum battery SoC = 40%
+2025/05/23 16:42:59 Starting management of the inverter
+2025/05/23 16:42:59 Authenticating
+2025/05/23 16:42:59 Starting management of the battery SOC
+2025/05/23 16:42:59 Starting power management to the CT
+2025/05/23 16:43:00 Input power = 60W, Battery SOC = 92%, Load = 1119W.
+2025/05/23 16:43:01 Minimum allowed battery SOC threshold = 40%
+2025/05/23 16:43:01 Maximum change to battery SOC threshold = 5%
 ```
 
 ### Running *gnomon* as a cron job
