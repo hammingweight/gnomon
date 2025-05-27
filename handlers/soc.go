@@ -95,6 +95,7 @@ L:
 		if newThreshold-threshold < 1 {
 			newThreshold = threshold + 1
 		}
+		deltaSoc = (deltaSoc + 1) / 2
 		if newThreshold-threshold > deltaSoc {
 			newThreshold = threshold + deltaSoc
 		}
