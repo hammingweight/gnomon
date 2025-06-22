@@ -20,7 +20,6 @@ import (
 	"context"
 	"log"
 	"math"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -86,9 +85,6 @@ L:
 			newThreshold = threshold - deltaSoc
 		}
 		threshold = newThreshold
-	} else if maxSoc == 99 {
-		r := rand.Intn(2)
-		threshold += r
 	} else {
 		r := math.Pow(100.0/float64(maxSoc), 0.5)
 		newThreshold := int(r * float64(threshold))
