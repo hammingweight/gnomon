@@ -90,7 +90,7 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	// Geyser2
 	wg.Add(1)
 	g2Chan := make(chan api.State)
-	e2Delay := g2Delay + 91*time.Minute
+	e2Delay := g2Delay + 71*time.Minute
 	go GeyserHandler(ctx, wg, g2Delay, e2Delay, g2Chan)
 	chans = append(chans, g2Chan)
 
