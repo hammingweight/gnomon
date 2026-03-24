@@ -199,6 +199,11 @@ func GeyserHandler(ctx context.Context, wg *sync.WaitGroup, startDelay time.Dura
 				log.Println("Failed to read discharge threshold: ", err)
 				continue
 			}
+			log.Printf("Battery discharge threshold: %d%%", threshold)
+			if threshold > 50 {
+				log.Println("Battery discharge threshold is too high to power the geyser")
+				return
+			}
 		case <-ctx.Done():
 			return
 		}
