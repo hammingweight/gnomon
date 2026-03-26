@@ -29,11 +29,13 @@ func average(l []int) int {
 	if len(l) == 0 {
 		return 0
 	}
-	s := 0
-	for _, v := range l {
-		s += v
+	s, t := 0, 0
+	for w, v := range l {
+		s += (w + 1) * v
+		t += w + 1
 	}
-	return s / len(l)
+	log.Printf("Average power: %dW", (s / t))
+	return s / t
 }
 
 // upperTriggerOnSoc is the SOC at which the inverter should power
@@ -60,8 +62,8 @@ func lowerTriggerOnSoc(threshold int) int {
 // the inverter to power non-essential loads. The higher the battery SoC,
 // the lower the input power needed.
 func triggerOnPower(ratedPower int, threshold int, soc int) int {
-	pu := ratedPower * 14 / 100
-	pl := ratedPower * 28 / 100
+	pu := ratedPower / 10
+	pl := pu * 3
 	su := upperTriggerOnSoc(threshold)
 	sl := lowerTriggerOnSoc(threshold)
 	if sl < su {
