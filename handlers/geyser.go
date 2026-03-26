@@ -34,7 +34,6 @@ func average(l []int) int {
 		s += (w + 1) * v
 		t += w + 1
 	}
-	log.Printf("Average power: %dW", (s / t))
 	return s / t
 }
 
