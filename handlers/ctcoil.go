@@ -60,8 +60,8 @@ func lowerTriggerOnSoc(threshold int) int {
 // the inverter to power non-essential loads. The higher the battery SoC,
 // the lower the input power needed.
 func triggerOnPower(ratedPower int, threshold int, soc int) int {
-	pu := ratedPower / 8
-	pl := ratedPower / 4
+	pu := ratedPower / 10
+	pl := pu * 3
 	su := upperTriggerOnSoc(threshold)
 	sl := lowerTriggerOnSoc(threshold)
 	if sl < su {
