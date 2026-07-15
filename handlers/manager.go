@@ -42,7 +42,7 @@ func setupLogging(logfile string) (*os.File, error) {
 }
 
 // ManageInverter spawns handlers to respond to changes in the inverter's state.
-func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, configFile string, minSoc int, deltaSoc int, ct bool) error {
+func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, configFile string, minSoc int, deltaSoc int, ct int) error {
 	// Set up logging
 	f, err := setupLogging(logfile)
 	if err != nil {
@@ -82,10 +82,10 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 
 	// If the user wants gnomon to enable/disable power to the non-essential circuits,
 	// add a handler.
-	if ct {
+	if ct > 0 {
 		wg.Add(1)
 		ctChan := make(chan api.State)
-		go CtCoilHandler(ctx, wg, ctChan)
+		go CtCoilHandler(ct, ctx, wg, ctChan)
 		chans = append(chans, ctChan)
 	}
 

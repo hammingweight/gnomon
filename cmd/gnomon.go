@@ -54,6 +54,7 @@ var startTime HhMm
 var endTime HhMm
 var minSoc SoC = SoC(-1)
 var deltaSoc = SoC(5)
+var ctSoc = SoC(0)
 
 func run(cmd *cobra.Command) error {
 	// Set up logging
@@ -74,14 +75,8 @@ func run(cmd *cobra.Command) error {
 		return err
 	}
 
-	// Must the CT coil be enabled/disabled?
-	ct, err := cmd.Flags().GetBool("ct-coil")
-	if err != nil {
-		return err
-	}
-
 	// Start managing.
-	return handlers.ManageInverter(logfile, delay, runTime, configFile, minSoc.Int(), deltaSoc.Int(), ct)
+	return handlers.ManageInverter(logfile, delay, runTime, configFile, minSoc.Int(), deltaSoc.Int(), ctSoc.Int())
 }
 
 var gnomonCmd = &cobra.Command{
@@ -114,7 +109,7 @@ func init() {
 	gnomonCmd.Flags().VarP(&startTime, "start", "s", "start time in 24 hour HH:MM format, e.g. 06:00")
 	gnomonCmd.Flags().VarP(&endTime, "end", "e", "end time in 24 hour HH:MM format, e.g. 19:30")
 	gnomonCmd.Flags().StringP("logfile", "l", "", "log file path")
-	gnomonCmd.Flags().BoolP("ct-coil", "C", false, "manage power to the non-essential load")
+	gnomonCmd.Flags().VarP(&ctSoc, "ct-coil", "C", "manage power to the non-essential load")
 	gnomonCmd.Flags().VarP(&minSoc, "min-soc", "m", "minimum battery state of charge")
 	gnomonCmd.Flags().VarP(&deltaSoc, "delta-soc", "d", "maximum change to the battery state of charge")
 }
