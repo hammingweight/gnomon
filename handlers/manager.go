@@ -85,7 +85,7 @@ func ManageInverter(logfile string, delay time.Duration, runTime time.Duration, 
 	if ct > 0 {
 		wg.Add(1)
 		ctChan := make(chan api.State)
-		go CtCoilHandler(ct, ctx, wg, ctChan)
+		go CtCoilHandler(ctx, ct, wg, ctChan)
 		chans = append(chans, ctChan)
 	}
 

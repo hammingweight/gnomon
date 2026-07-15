@@ -160,7 +160,7 @@ func getRecentPowerReadings(powerTimes *[]powerTime) []int {
 
 // CtCoilHandler enables or disables power flowing from the inverter to non-essential
 // circuits depending on the battery's SoC and the input power.
-func CtCoilHandler(minBatterySoc int, ctx context.Context, wg *sync.WaitGroup, ch chan api.State) {
+func CtCoilHandler(ctx context.Context, minBatterySoc int, wg *sync.WaitGroup, ch chan api.State) {
 	log.Println("Starting power management to the CT")
 	defer wg.Done()
 	defer func() {
