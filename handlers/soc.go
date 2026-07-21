@@ -107,12 +107,12 @@ L:
 	}
 
 	log.Printf("Setting battery's minimum SOC to %d%%\n", threshold)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 120; i++ {
 		if err = api.UpdateBatteryCapacity(threshold); err == nil {
 			return
 		}
 		log.Println("Updating battery capacity failed: ", err)
-		time.Sleep(5 * time.Second)
+		time.Sleep(60 * time.Second)
 	}
-	log.Println("Couldn't update battery capacity after 10 attempts, giving up")
+	log.Println("Couldn't update battery capacity after 120 attempts, giving up")
 }
