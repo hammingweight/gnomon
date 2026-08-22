@@ -4,21 +4,21 @@ import "testing"
 
 func TestUpperTriggerOnSoc(t *testing.T) {
 	threshold := 50
-	expected := 95
+	expected := 97
 	actual := upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
 	threshold = 30
-	expected = 95
+	expected = 97
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
 	}
 
 	threshold = 40
-	expected = 95
+	expected = 97
 	actual = upperTriggerOnSoc(threshold)
 	if actual != expected {
 		t.Errorf("expected %d, got %d", expected, actual)
