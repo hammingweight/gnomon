@@ -83,6 +83,7 @@ func shouldSwitchOn(averagePower int, inverterPower int, soc int, thresholdSoc i
 	}
 
 	turnOnPower := triggerOnPower(inverterPower, thresholdSoc, soc)
+	log.Printf("Average power: %d, turn on power: %d, SoC: %d, threshold SoC: %d\n", averagePower, turnOnPower, soc, thresholdSoc)
 	return averagePower > turnOnPower
 }
 
