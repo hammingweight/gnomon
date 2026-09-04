@@ -61,7 +61,7 @@ func lowerTriggerOnSoc(threshold int) int {
 // the lower the input power needed.
 func triggerOnPower(ratedPower int, threshold int, soc int) int {
 	pu := ratedPower / 10
-	pl := pu * 3
+	pl := ratedPower / 3
 	su := upperTriggerOnSoc(threshold)
 	sl := lowerTriggerOnSoc(threshold)
 	if sl < su {
