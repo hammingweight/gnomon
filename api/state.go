@@ -31,8 +31,10 @@ type State struct {
 	Soc     int
 	load    rest.Load
 	Load    int
+	grid    rest.Grid
+	Grid    int
 }
 
 func (s State) String() string {
-	return fmt.Sprintf("Input power = %dW, Battery SOC = %d%%, Load = %dW.", s.Power, s.Soc, s.Load)
+	return fmt.Sprintf("Input power = %4dW, Battery SOC = %3d%%, Grid = %4dW, Load = %4dW.", s.Power, s.Soc, s.Grid, s.Load)
 }

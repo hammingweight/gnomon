@@ -238,6 +238,7 @@ L2:
 	manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
 
 	checkLoad := false
+	checkGrid := false
 	for {
 		select {
 		case <-ctx.Done():
@@ -248,11 +249,18 @@ L2:
 			manageCoil(ctx, averagePower, inverterPower, s.Soc, threshold)
 			if checkLoad {
 				if s.Load < 2000 {
-					log.Printf("Inverter load: %dW\n", s.Load)
+					log.Printf("Load power: %dW\n", s.Load)
+					return
+				}
+			}
+			if checkGrid {
+				if s.Grid < 2000 {
+					log.Printf("Grid power: %dW\n", s.Grid)
 					return
 				}
 			}
 			checkLoad = !api.EssentialOnly(ctx)
+			checkGrid = !checkLoad
 		case <-endChan:
 			log.Println("The geyser has switched off")
 			return
