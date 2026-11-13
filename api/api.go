@@ -97,7 +97,7 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 		return false, err
 	}
 	if cmp.Equal(s.battery, *bat) {
-		log.Println("Got stale cached battery state.")
+		log.Println("Got stale battery data.")
 		return false, nil
 	}
 
@@ -110,13 +110,28 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 		return false, err
 	}
 	if cmp.Equal(s.load, *load) {
-		log.Println("Got stale cached load state.")
+		log.Println("Got stale load data.")
+		return false, nil
+	}
+
+	grid, err := c.client.Grid(ctx)
+	if err != nil {
+		return false, err
+	}
+	gridValue, ok := grid.Get("limiterTotalPower")
+	if !ok {
+		return false, errors.New("can't read grid limiterTotalPower")
+	}
+	s.Grid = int(gridValue.(float64))
+	if cmp.Equal(s.grid, *grid) {
+		log.Println("Got stale grid data.")
 		return false, nil
 	}
 
 	s.battery = *bat
 	s.load = *load
 	s.input = *input
+	s.grid = *grid
 	return true, nil
 }
 
