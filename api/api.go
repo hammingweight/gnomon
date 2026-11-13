@@ -27,6 +27,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hammingweight/synkctl/configuration"
 	"github.com/hammingweight/synkctl/rest"
 )
@@ -79,16 +80,11 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	pv, ok := input.PV(0)
+	_, ok := input.PV(0)
 	if !ok {
 		return false, errors.New("can't read MPPT values")
 	}
-	t, ok := pv["time"]
-	if !ok {
-		return false, errors.New("can't read update time")
-	}
-	updateTime := t.(string)
-	if s.Time == updateTime {
+	if cmp.Equal(s.input, *input) {
 		return false, nil
 	}
 
@@ -100,6 +96,10 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	if cmp.Equal(s.battery, *bat) {
+		log.Println("Got stale cached battery state.")
+		return false, nil
+	}
 
 	load, err := c.client.Load(ctx)
 	if err != nil {
@@ -109,8 +109,14 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	if cmp.Equal(s.load, *load) {
+		log.Println("Got stale cached load state.")
+		return false, nil
+	}
 
-	s.Time = updateTime
+	s.battery = *bat
+	s.load = *load
+	s.input = *input
 	return true, nil
 }
 

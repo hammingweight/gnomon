@@ -5,6 +5,8 @@ github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nos
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
 github.com/go-yaml/yaml v2.1.0+incompatible h1:RYi2hDdss1u4YE7GwixGzWwVo47T8UQwnTLB6vQiq+o=
 github.com/go-yaml/yaml v2.1.0+incompatible/go.mod h1:w2MrLa16VYP0jy6N7M5kHaCkaLENm+P+Tv+MfurjSw0=
+github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
+github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/hammingweight/synkctl v1.4.4 h1:QJPNjwzkSFQfOjtyKb6PBFX+CWEyewbrB7m1ng7/Msw=
 github.com/hammingweight/synkctl v1.4.4/go.mod h1:UejRYiWGApBZTg9P+saXK3p66qeIDRTRFAmuLGVDxx8=
 github.com/hammingweight/synkctl v1.4.5 h1:bKVAgEeV943nlT2S/A6kQkaxLsilEekV4XQG/01wpJ4=

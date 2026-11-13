@@ -16,15 +16,21 @@ limitations under the License.
 
 package api
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/hammingweight/synkctl/rest"
+)
 
 // State represents the state of the inverter: input power, battery SoC, load power and the
 // time at which the measurements were taken.
 type State struct {
-	Power int
-	Soc   int
-	Load  int
-	Time  string
+	input   rest.Input
+	Power   int
+	battery rest.Battery
+	Soc     int
+	load    rest.Load
+	Load    int
 }
 
 func (s State) String() string {
