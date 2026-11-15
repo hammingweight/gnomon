@@ -23,7 +23,7 @@ import (
 )
 
 // State represents the state of the inverter: input power, battery SoC, load power and the
-// time at which the measurements were taken.
+// grid power at a time when the measurements were taken.
 type State struct {
 	input   rest.Input
 	Power   int

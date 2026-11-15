@@ -84,9 +84,6 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	if !ok {
 		return false, errors.New("can't read MPPT values")
 	}
-	if cmp.Equal(s.input, *input) {
-		return false, nil
-	}
 
 	bat, err := c.client.Battery(ctx)
 	if err != nil {
@@ -96,10 +93,6 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if cmp.Equal(s.battery, *bat) {
-		log.Println("Got stale battery data.")
-		return false, nil
-	}
 
 	load, err := c.client.Load(ctx)
 	if err != nil {
@@ -108,10 +101,6 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 	s.Load, err = load.Power()
 	if err != nil {
 		return false, err
-	}
-	if cmp.Equal(s.load, *load) {
-		log.Println("Got stale load data.")
-		return false, nil
 	}
 
 	grid, err := c.client.Grid(ctx)
@@ -123,15 +112,33 @@ func ReadState(ctx context.Context, s *State) (bool, error) {
 		return false, errors.New("can't read grid limiterTotalPower")
 	}
 	s.Grid = int(gridValue.(float64))
+
+	// Check if the battery, load, or grid data is stale
+	if cmp.Equal(s.input, *input) {
+		return false, nil
+	}
+
+	if cmp.Equal(s.battery, *bat) {
+		log.Println("Got stale battery data.")
+		return false, nil
+	}
+
+	if cmp.Equal(s.load, *load) {
+		log.Println("Got stale load data.")
+		return false, nil
+	}
+
 	if cmp.Equal(s.grid, *grid) {
 		log.Println("Got stale grid data.")
 		return false, nil
 	}
 
+	// Update the state with the new data
+	s.input = *input
 	s.battery = *bat
 	s.load = *load
-	s.input = *input
 	s.grid = *grid
+
 	return true, nil
 }
 
@@ -162,7 +169,7 @@ func Poll(ctx context.Context, configFile string, ch chan State) {
 			if rand.Intn(5) == 0 {
 				reauthFlag = true
 				log.Println("Error during poll: ", err)
-				time.Sleep(30 * time.Second)
+				time.Sleep(15 * time.Second)
 			}
 			continue
 		}
